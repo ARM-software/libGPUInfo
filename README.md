@@ -14,6 +14,9 @@ This library is only able to provide information about the GPU hardware
 configuration itself. It is not possible to determine the available range of
 GPU clock frequencies, as this is handled outside of the GPU itself.
 
+For documentation about the capabilities of the various Arm GPUs you can
+refer to the [Arm GPU Datasheet][2].
+
 ## Supported devices
 
 This library supports all Arm GPU products from the Mali-T700 series onwards,
@@ -30,11 +33,8 @@ from this repository you acknowledge that you accept terms specified in the
 
 # Support
 
-If you have issues with the libGPUInfo library itself, please raise them in the
-project's GitHub issue tracker.
-
-For documentation about the capabilities of the various Arm GPUs you can
-refer to our [Arm GPU Datasheet][2].
+If you have issues with the library itself, please raise them in the project's
+GitHub issue tracker.
 
 If you have any questions about Arm GPUs, application development for Arm GPUs,
 or general mobile graphics development or technology please submit them on the
