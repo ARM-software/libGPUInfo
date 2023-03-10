@@ -33,6 +33,9 @@ from this repository you acknowledge that you accept terms specified in the
 If you have issues with the libGPUInfo library itself, please raise them in the
 project's GitHub issue tracker.
 
+For documentation about the capabilities of the various Arm GPUs you can
+refer to our [Arm GPU Datasheet][2].
+
 If you have any questions about Arm GPUs, application development for Arm GPUs,
 or general mobile graphics development or technology please submit them on the
 [Arm Community graphics forums][1].
@@ -42,3 +45,4 @@ or general mobile graphics development or technology please submit them on the
 _Copyright © 2023, Arm Limited and contributors. All rights reserved._
 
 [1]: https://community.arm.com/support-forums/f/graphics-gaming-and-vr-forum/
+[2]: https://developer.arm.com/documentation/102849/latest/
