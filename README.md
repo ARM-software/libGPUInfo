@@ -5,31 +5,74 @@ configuration of the Arm® Immortalis™ or Arm Mali™ GPU present in the syste
 This information allows developers to adjust application workload complexity to
 match the performance capability of the current device.
 
-> NOTE: This library is still undergoing development, but we expect the first
-> version to be released soon ...
+This library is able to provide the Arm GPU hardware configuration, as well as
+performance metrics for the shader cores inside the GPU. The library is unable
+to provide systemc infomation, such as the available GPU clock frequencies,
+because this is provided by the device manufacturer and is not part of the Arm
+GPU itself.
 
-## What information
-
-This library is only able to provide information about the GPU hardware
-configuration itself. It is not possible to determine the available range of
-GPU clock frequencies, as this is handled outside of the GPU itself.
-
-For documentation about the capabilities of the various Arm GPUs you can
-refer to the [Arm GPU Datasheet][2].
+For offline documentation about the capabilities of the various Arm GPUs on the
+market today please refer to the [Arm GPU Datasheet][2].
 
 ## Supported devices
 
-This library supports all Arm GPU products from the Mali-T700 series onwards,
-ensuring developers have coverage of the vast majority of smartphones with
-Arm GPUs that are in use today.
+This library aims to support all Arm GPU products from the Mali-T700 series
+onwards, ensuring developers have coverage of the vast majority of smartphones
+with Arm GPUs that are in use today. If you find a device with an Arm GPU which
+does not work, or gives inaccurate results, please open an Issue on the GitHub
+issue tracker.
 
-This library supports devices using the Arm commercial driver.
+This library only supports devices using the Arm commercial driver.
 
 ## License
 
-This project is licensed under the MIT license.  By downloading any component
+This project is licensed under the MIT license. By downloading any component
 from this repository you acknowledge that you accept terms specified in the
 [LICENSE.txt](LICENSE.txt) file.
+
+# Available information
+
+The query mechanism can report the following information about the GPU:
+
+* **Name:** The product name string, e.g. `Mali-G710`
+* **Architecture:** The product architecture name string, e.g. `Valhall`
+* **Model number:** The product ID number, e.g. `0xa002`.
+* **Shader core count:** The number of shader cores in the design.
+* **L2 cache count:** The number of L2 cache slices in the design.
+* **L2 cache size:** The total L2 cache size, summed over all slices, in bytes.
+* **Bus size:** The width of the external data bus, per cache slice, in bits.
+
+The query mechanism can report the following per-core shader core information:
+
+* **Execution engine count:** The number of arithmetic macroblocks.
+* **FP32 FMA count:** The peak fp32 FMAs per clock, summed over all engines.
+* **FP16 FMA count:** The peak fp16 FMAs per clock, summed over all engines.
+* **Texel count:** The peak bilinear filtered texture samples per clock.
+* **Pixel count:** The peak pixels per clock.
+
+# Building
+
+The library is provided as a single C++ source file and a single C++ header
+file. It is expected that developers will copy the libgpuinfo files directly
+into their existing application build system, so no off-the-shelf build system
+is provided for the library integration.
+
+You can also build a simple command line tool that can be used for adhoc
+testing of devices. To build the Android command line tool:
+
+* Set `ANDROID_NDK_HOME` to the path of your Android NDK install.
+* Run `./android_build.sh [Release|Debug]`.
+
+The output binary will be `./bin/arm_gpuinfo`. You can run this on the device
+and print the results for your device to the terminal using the following
+commands:
+
+```
+adb push ./bin/arm_gpuinfo /data/local/tmp
+adb shell chmod u+x /data/local/tmp/arm_gpuinfo
+adb shell /data/local/tmp/arm_gpuinfo
+adb shell rm /data/local/tmp/arm_gpuinfo
+```
 
 # Support
 

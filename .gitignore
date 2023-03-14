@@ -3,6 +3,7 @@
 .vscode
 
 # Build and debug output files
+/bin*
 /build*
 /log*
 /scratch*
