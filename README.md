@@ -80,8 +80,8 @@ std::cout << "GPU: " << info.gpu_name << " MP" << info.num_shader_cores << "\n";
 ```
 
 Note that the returned instance uses a unique pointer for lifetime management,
-and both the instance and the query result will freed when the instance drops
-out of scope.
+and both the instance and the query result will be freed when the instance 
+drops out of scope.
 
 # Building
 
