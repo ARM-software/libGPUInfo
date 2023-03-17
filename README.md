@@ -61,6 +61,28 @@ The query mechanism can report the following per-core shader core information:
 * **Texel count:** The peak bilinear filtered texture samples per clock.
 * **Pixel count:** The peak pixels per clock.
 
+# Using the library
+
+The library is very simple to use:
+
+```C++
+// Create a connection with the kernel driver ...
+std::unique_ptr<instance> conn = libgpuinfo::instance::create();
+if (!conn)
+{
+    std::cout << "ERROR: Failed to create Mali instance\n";
+    return;
+}
+
+// Fetch the information result and do something with it ...
+const gpuinfo& info = conn->get_info();
+std::cout << "GPU: " << info.gpu_name << " MP" << info.num_shader_cores << "\n";
+```
+
+Note that the returned instance uses a unique pointer for lifetime management,
+and both the instance and the query result will freed when the instance drops
+out of scope.
+
 # Building
 
 The library is provided as a single C++ source file and a single C++ header
