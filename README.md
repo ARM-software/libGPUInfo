@@ -7,7 +7,7 @@ match the performance capability of the current device.
 
 This library is able to provide the Arm GPU hardware configuration, as well as
 performance metrics for the shader cores inside the GPU. The library is unable
-to provide systemc infomation, such as the available GPU clock frequencies,
+to provide system infomation, such as the available GPU clock frequencies,
 because this is provided by the device manufacturer and is not part of the Arm
 GPU itself.
 
