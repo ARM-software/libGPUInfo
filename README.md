@@ -24,6 +24,17 @@ issue tracker.
 
 This library only supports devices using the Arm commercial driver.
 
+## Related API extensions
+
+This library is intended to support any Arm device, but some developers prefer
+to use functionality within the graphics API when it is available. New devices
+can report a similar set of information to this library using in-API queries.
+For more information please refer to the extension specifications:
+
+* [VK_ARM_shader_core_properties][3]
+* [VK_ARM_shader_core_builtins][4]
+
+
 ## License
 
 This project is licensed under the MIT license. By downloading any component
@@ -89,3 +100,5 @@ _Copyright © 2023, Arm Limited and contributors. All rights reserved._
 
 [1]: https://community.arm.com/support-forums/f/graphics-gaming-and-vr-forum/
 [2]: https://developer.arm.com/documentation/102849/latest/
+[3]: https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_ARM_shader_core_properties.html
+[4]: https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_ARM_shader_core_builtins.html
