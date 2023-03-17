@@ -45,9 +45,9 @@ from this repository you acknowledge that you accept terms specified in the
 
 The query mechanism can report the following information about the GPU:
 
-* **Name:** The product name string, e.g. `Mali-G710`
-* **Architecture:** The product architecture name string, e.g. `Valhall`
-* **Model number:** The product ID number, e.g. `0xa002`.
+* **Name:** The product name string, e.g. "Mali-G710".
+* **Architecture:** The product architecture name string, e.g. "Valhall".
+* **Model number:** The product ID number, e.g. 0xa002.
 * **Shader core count:** The number of shader cores in the design.
 * **L2 cache count:** The number of L2 cache slices in the design.
 * **L2 cache size:** The total L2 cache size, summed over all slices, in bytes.
