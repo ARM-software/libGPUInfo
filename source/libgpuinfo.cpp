@@ -295,112 +295,97 @@ const uint32_t get_num_pixels(
 
 class prop_decoder {
   public:
-    explicit prop_decoder(std::vector<unsigned char> buffer)
-        : reader_{std::move(buffer)} {}
+    prop_decoder(std::vector<unsigned char> buffer)
+        : buffer_{ std::move(buffer) }
+        , data_{ buffer_.data() }
+        , size_{ buffer_.size() } {}
 
-    gpuinfo decode(bool &success)  {
-        gpuinfo dev_consts {};
-        uint64_t num_core_groups {};
-        std::array<uint64_t, 16> core_mask {};
+    bool decode(gpuinfo& info) {
+        bool success = true;
+
         uint64_t raw_core_features {};
         uint64_t raw_thread_features {};
 
-        while (reader_.size() > 0) {
+        while (size_ > 0) {
             auto p = next(success);
             if (!success) {
-                return {};
+                return false;
             }
 
-            prop_id_type id = p.first;
+            prop_id_t id = p.first;
             uint64_t value = p.second;
 
             switch (id) {
-            case prop_id_type::product_id:
-                dev_consts.gpu_id = value;
+            case prop_id_t::product_id:
+                info.gpu_id = value;
                 break;
-            case prop_id_type::l2_log2_cache_size:
-                dev_consts.num_l2_bytes = (1UL << value);
+            case prop_id_t::l2_log2_cache_size:
+                info.num_l2_bytes = 1UL << value;
                 break;
-            case prop_id_type::l2_num_l2_slices:
-                dev_consts.num_l2_slices = value;
+            case prop_id_t::l2_num_l2_slices:
+                info.num_l2_slices = value;
                 break;
-            case prop_id_type::raw_l2_features:
-                /* log2(bus width in bits) stored in top 8 bits of register. */
-                dev_consts.num_bus_bits = 1UL << ((value & 0xFF000000) >> 24);
+            case prop_id_t::raw_l2_features:
+                /* log2(bus width) stored in top 8 bits of register. */
+                info.num_bus_bits = 1UL << ((value >> 24) & 0xFF);
                 break;
-            case prop_id_type::raw_core_features:
+            case prop_id_t::raw_core_features:
                 raw_core_features = value;
                 break;
-            case prop_id_type::coherency_num_core_groups:
-                num_core_groups = value;
-                break;
-            case prop_id_type::raw_thread_features:
+            case prop_id_t::raw_thread_features:
                 raw_thread_features = value;
                 break;
-            case prop_id_type::coherency_group_0:
-                core_mask[0] = value;
-                break;
-            case prop_id_type::coherency_group_1:
-                core_mask[1] = value;
-                break;
-            case prop_id_type::coherency_group_2:
-                core_mask[2] = value;
-                break;
-            case prop_id_type::coherency_group_3:
-                core_mask[3] = value;
+            case prop_id_t::coherency_group_0:
+            case prop_id_t::coherency_group_1:
+            case prop_id_t::coherency_group_2:
+            case prop_id_t::coherency_group_3:
+                info.num_shader_cores += __builtin_popcount(value);
                 break;
             default:
                 break;
             }
         }
 
-        // TODO: Build this as we go?
-        dev_consts.num_shader_cores = 0;
-        for (uint64_t i = 0; i < num_core_groups; ++i)
-        {
-            dev_consts.num_shader_cores += __builtin_popcount(core_mask[i]);
+        info.num_exec_engines = get_num_exec_engines(
+            info.gpu_id,
+            info.num_shader_cores,
+            raw_core_features,
+            raw_thread_features);
+
+        if (!info.num_exec_engines) {
+            return false;
         }
 
-        dev_consts.num_exec_engines = get_num_exec_engines(
-            dev_consts.gpu_id,
-            dev_consts.num_shader_cores,
+        info.num_fp32_fmas_per_cy = get_num_fp32_fmas(
+            info.gpu_id,
+            info.num_shader_cores,
             raw_core_features,
             raw_thread_features);
 
-        dev_consts.num_fp32_fmas_per_cy = get_num_fp32_fmas(
-            dev_consts.gpu_id,
-            dev_consts.num_shader_cores,
+        info.num_fp16_fmas_per_cy = info.num_fp32_fmas_per_cy * 2;
+
+        info.num_texels_per_cy = get_num_texels(
+            info.gpu_id,
+            info.num_shader_cores,
             raw_core_features,
             raw_thread_features);
 
-        dev_consts.num_fp16_fmas_per_cy = dev_consts.num_fp32_fmas_per_cy * 2;
-
-        dev_consts.num_texels_per_cy = get_num_texels(
-            dev_consts.gpu_id,
-            dev_consts.num_shader_cores,
+        info.num_pixels_per_cy = get_num_pixels(
+            info.gpu_id,
+            info.num_shader_cores,
             raw_core_features,
             raw_thread_features);
 
-        dev_consts.num_pixels_per_cy = get_num_pixels(
-            dev_consts.gpu_id,
-            dev_consts.num_shader_cores,
-            raw_core_features,
-            raw_thread_features);
-
-        if (!dev_consts.num_exec_engines) {
-            return {};
-        }
-
-        return dev_consts;
+        return true;
     }
 
   private:
     /** Property id type. */
-    using prop_id_type = kbase_post_r21::get_gpuprops_t::gpuprop_code;
+    using prop_id_t = kbase_post_r21::get_gpuprops_t::gpuprop_code;
     /** Property size type. */
-    using prop_size_type = kbase_post_r21::get_gpuprops_t::gpuprop_size;
+    using prop_size_t = kbase_post_r21::get_gpuprops_t::gpuprop_size;
 
-    static std::pair<prop_id_type, prop_size_type> to_prop_metadata(uint32_t v)  {
+    static std::pair<prop_id_t, prop_size_t> to_prop_metadata(uint32_t v)  {
         /* Property id/size encoding is:
          * +--------+----------+
          * | 31   2 | 1      0 |
@@ -408,70 +393,56 @@ class prop_decoder {
          * | PropId | PropSize |
          * +--------+----------+
          */
-        static constexpr unsigned prop_id_shift = 2;
-        static constexpr unsigned prop_size_mask = 0x3;
+        static unsigned int id_shift { 2 };
+        static unsigned int size_mask { 0b11 };
 
-        return {static_cast<prop_id_type>(v >> prop_id_shift), static_cast<prop_size_type>(v & prop_size_mask)};
+        return { static_cast<prop_id_t>(v >> id_shift), static_cast<prop_size_t>(v & size_mask) };
     }
 
-    std::pair<prop_id_type, uint64_t> next(bool& success)  {
+    std::pair<prop_id_t, uint64_t> next(bool& success)  {
         success = true;
-        auto p = to_prop_metadata(reader_.read_bytes<uint32_t>(success));
-        if (!success)
+        auto p = to_prop_metadata(read_bytes<uint32_t>(success));
+        if (success)
         {
-            return {};
-        }
+            prop_id_t id = p.first;
+            prop_size_t size = p.second;
 
-        prop_id_type id = p.first;
-        prop_size_type size = p.second;
-
-        switch (size) {
-        case prop_size_type::uint8:
-            return {id, reader_.read_bytes<uint8_t>(success)};
-        case prop_size_type::uint16:
-            return {id, reader_.read_bytes<uint16_t>(success)};
-        case prop_size_type::uint32:
-            return {id, reader_.read_bytes<uint32_t>(success)};
-        case prop_size_type::uint64:
-            return {id, reader_.read_bytes<uint64_t>(success)};
+            switch (size) {
+            case prop_size_t::uint8:
+                return { id, read_bytes<uint8_t>(success) };
+            case prop_size_t::uint16:
+                return { id, read_bytes<uint16_t>(success) };
+            case prop_size_t::uint32:
+                return { id, read_bytes<uint32_t>(success) };
+            case prop_size_t::uint64:
+                return { id, read_bytes<uint64_t>(success) };
+            }
         }
 
         return {};
     }
 
-    /* Reads values out of the KBASE_IOCTL_GET_GPUPROPS data buffer */
-    class prop_reader {
-      public:
-        explicit prop_reader(std::vector<unsigned char> buffer)
-            : buffer_{std::move(buffer)}
-            , data_{buffer_.data()}
-            , size_{buffer_.size()} {}
-
-        size_t size() const noexcept { return size_; }
-
-        template <typename T>
-        T read_bytes(bool& success)  {
-            // Check we have enough bytes in the buffer
-            if (size_ < sizeof(T)) {
-                success = false;
-                return 0;
-            }
-
-            T ret {};
-            for (size_t b = 0; b < sizeof(T); b++)
-            {
-                ret |= static_cast<T>(static_cast<uint64_t>(data_[b]) << (8 * b));
-            }
-            data_ += sizeof(T);
-            size_ -= sizeof(T);
-            return ret;
+    template <typename T>
+    T read_bytes(bool& success)  {
+        // Check we have enough bytes in the buffer
+        if (size_ < sizeof(T)) {
+            success = false;
+            return 0;
         }
 
-      private:
-        std::vector<unsigned char> const buffer_;
-        unsigned char const *data_;
-        std::size_t size_;
-    } reader_;
+        T ret {};
+        for (size_t b = 0; b < sizeof(T); b++)
+        {
+            ret |= static_cast<T>(static_cast<uint64_t>(data_[b]) << (8 * b));
+        }
+        data_ += sizeof(T);
+        size_ -= sizeof(T);
+        return ret;
+    }
+
+    std::vector<unsigned char> const buffer_;
+    unsigned char const *data_;
+    std::size_t size_;
 };
 
 /**
@@ -687,9 +658,7 @@ bool instance::props_post_r21(int fd) {
     }
 
     prop_decoder decoder { buffer };
-    bool success = true;
-    constants_ = decoder.decode(success);
-    return success;
+    return decoder.decode(constants_);
 }
 
 }
