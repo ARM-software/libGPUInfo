@@ -25,6 +25,7 @@
 #include <array>
 #include <cerrno>
 #include <cstdint>
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <string>
