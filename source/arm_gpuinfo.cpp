@@ -41,10 +41,13 @@
  */
 
 #include <iostream>
-
-#include <libgpuinfo.hpp>
-#include <sys/system_properties.h>
 #include <sys/utsname.h>
+
+#if defined(__ANDROID__)
+    #include <sys/system_properties.h>
+#endif
+
+#include "libgpuinfo.hpp"
 
 #if defined(__ANDROID__)
 std::string get_android_property(

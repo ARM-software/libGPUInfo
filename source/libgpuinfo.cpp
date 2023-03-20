@@ -22,20 +22,20 @@
  * SOFTWARE.
  */
 
-#include <libgpuinfo.hpp>
-
 #include <array>
 #include <cerrno>
 #include <cstdint>
 #include <iostream>
-#include <vector>
-#include <string>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+
+#include "libgpuinfo.hpp"
 
 namespace libgpuinfo {
 
