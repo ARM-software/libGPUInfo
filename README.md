@@ -29,6 +29,11 @@ This library only supports devices using the Arm commercial driver.
 This library is intended to support any Arm device, but some developers prefer
 to use functionality within the graphics API when it is available. New devices
 can report a similar set of information to this library using in-API queries.
+
+We recommend using the extensions on devices where it is available. Doing so
+means the application automatically gets up-to-date information for all
+devices, even those released after the application binary was built.
+
 For more information please refer to the extension specifications:
 
 * [VK_ARM_shader_core_properties][3]
@@ -80,7 +85,7 @@ std::cout << "GPU: " << info.gpu_name << " MP" << info.num_shader_cores << "\n";
 ```
 
 Note that the returned instance uses a unique pointer for lifetime management,
-and both the instance and the query result will be freed when the instance 
+and both the instance and the query result will be freed when the instance
 drops out of scope.
 
 # Building
