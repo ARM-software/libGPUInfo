@@ -445,11 +445,9 @@ class prop_decoder {
     std::size_t size_;
 };
 
-/**
- * Mali device driver instance.
- */
+/* See header for documentation */
 std::unique_ptr<instance> instance::create(
-    uint32_t id
+    const uint32_t id
 ) {
     std::string device_path("/dev/mali" + std::to_string(id));
 
@@ -476,28 +474,23 @@ std::unique_ptr<instance> instance::create(
     return result;
 }
 
-/**
- * Get the GPU device constants.
- *
- * @return The device constants.
- */
+/* See header for documentation */
 const gpuinfo& instance::get_info() const
 {
-    return constants_;
+    return info_;
 };
 
-/**
-  * Destroy an instance, closing the device fd.
-  */
+/* See header for documentation */
 instance::~instance()
 {
     ::close(fd_);
 }
 
+/* See header for documentation */
 instance::instance(int fd):
     fd_(fd)
 {
-    if (!version_check()) {
+    if (!check_version()) {
         valid_ = false;
         return;
     }
@@ -507,7 +500,7 @@ instance::instance(int fd):
         return;
     }
 
-    if (!init_constants()) {
+    if (!init_props()) {
         valid_ = false;
         return;
     }
@@ -518,8 +511,8 @@ static bool is_supported(unsigned int major, unsigned int minor)
     return (major > 10) || ((major == 10) && (minor >= 2));
 }
 
-/** Detect kbase version. */
-bool instance::version_check() {
+/* See header for documentation */
+bool instance::check_version() {
     // Probe pre-r21 JM kernel
     // Must be first in the list because CSF reuses an old IOCTL ID
     iface_ = iface_type::pre_r21;
@@ -569,13 +562,13 @@ bool instance::set_flags() {
     return errno == 0 || errno == EINVAL || errno == EPERM;
 }
 
-/** Initialize constants_ field. */
-bool instance::init_constants() {
+/* See header for documentation */
+bool instance::init_props() {
     bool success;
     if (iface_ == iface_type::pre_r21) {
-        success = props_pre_r21(fd_);
+        success = init_props_pre_r21();
     } else {
-        success = props_post_r21(fd_);
+        success = init_props_post_r21();
     }
 
     // Perform some common cleanup on the data
@@ -584,67 +577,67 @@ bool instance::init_constants() {
         return false;
     }
 
-    constants_.num_l2_bytes *= constants_.num_l2_slices;
-    constants_.gpu_name = get_gpu_name(constants_.gpu_id, constants_.num_shader_cores);
-    constants_.architecture_name = get_architecture_name(constants_.gpu_id);
-    constants_.gpu_id = get_gpu_id(constants_.gpu_id);
+    info_.num_l2_bytes *= info_.num_l2_slices;
+    info_.gpu_name = get_gpu_name(info_.gpu_id, info_.num_shader_cores);
+    info_.architecture_name = get_architecture_name(info_.gpu_id);
+    info_.gpu_id = get_gpu_id(info_.gpu_id);
     return true;
 }
 
-/** Get device constants from old ioctl. */
-bool instance::props_pre_r21(int fd) {
+/* See header for documentation */
+bool instance::init_props_pre_r21() {
     int error = 0;
 
     kbase_pre_r21::uk_gpuprops_t props {};
     props.header.id = kbase_pre_r21::header_id::get_props;
     errno = 0;
-    ::ioctl(fd, kbase_pre_r21::get_gpuprops, &props);
+    ::ioctl(fd_, kbase_pre_r21::get_gpuprops, &props);
     if (errno) {
         return false;
     }
 
-    constants_.gpu_id = props.props.core_props.product_id;
-    constants_.num_l2_bytes = 1UL << props.props.l2_props.log2_cache_size;
-    constants_.num_l2_slices = props.props.l2_props.num_l2_slices;
-    constants_.num_bus_bits = 1UL << (props.props.raw_props.l2_features >> 24);
+    info_.gpu_id = props.props.core_props.product_id;
+    info_.num_l2_bytes = 1UL << props.props.l2_props.log2_cache_size;
+    info_.num_l2_slices = props.props.l2_props.num_l2_slices;
+    info_.num_bus_bits = 1UL << (props.props.raw_props.l2_features >> 24);
 
-    constants_.num_shader_cores = 0;
+    info_.num_shader_cores = 0;
     for (uint32_t i = 0; i < props.props.coherency_info.num_core_groups; i++)
     {
-        constants_.num_shader_cores += __builtin_popcount(props.props.coherency_info.group[i].core_mask);
+        info_.num_shader_cores += __builtin_popcount(props.props.coherency_info.group[i].core_mask);
     }
 
-    constants_.num_exec_engines = get_num_exec_engines(
-        constants_.gpu_id,
-        constants_.num_shader_cores,
+    info_.num_exec_engines = get_num_exec_engines(
+        info_.gpu_id,
+        info_.num_shader_cores,
         0, 0);
 
-    constants_.num_fp32_fmas_per_cy = get_num_fp32_fmas(
-        constants_.gpu_id,
-        constants_.num_shader_cores,
+    info_.num_fp32_fmas_per_cy = get_num_fp32_fmas(
+        info_.gpu_id,
+        info_.num_shader_cores,
         0, 0);
 
-    constants_.num_fp16_fmas_per_cy = constants_.num_fp32_fmas_per_cy * 2;
+    info_.num_fp16_fmas_per_cy = info_.num_fp32_fmas_per_cy * 2;
 
-    constants_.num_texels_per_cy = get_num_texels(
-        constants_.gpu_id,
-        constants_.num_shader_cores,
+    info_.num_texels_per_cy = get_num_texels(
+        info_.gpu_id,
+        info_.num_shader_cores,
         0, 0);
 
-    constants_.num_pixels_per_cy = get_num_pixels(
-        constants_.gpu_id,
-        constants_.num_shader_cores,
+    info_.num_pixels_per_cy = get_num_pixels(
+        info_.gpu_id,
+        info_.num_shader_cores,
         0, 0);
 
     return true;
 }
 
-/** Get the raw properties buffer as it's returned from the kernel. */
-bool instance::props_post_r21(int fd) {
+/* See header for documentation */
+bool instance::init_props_post_r21() {
     errno = 0;
 
     kbase_post_r21::get_gpuprops_t get_props = {};
-    int size = ::ioctl(fd, kbase_post_r21::get_gpuprops, &get_props);
+    int size = ::ioctl(fd_, kbase_post_r21::get_gpuprops, &get_props);
     if (errno) {
         return false;
     }
@@ -652,13 +645,13 @@ bool instance::props_post_r21(int fd) {
     std::vector<unsigned char> buffer(static_cast<std::size_t>(size));
     get_props.size = static_cast<uint32_t>(size);
     get_props.buffer.reset(buffer.data());
-    ::ioctl(fd, kbase_post_r21::get_gpuprops, &get_props);
+    ::ioctl(fd_, kbase_post_r21::get_gpuprops, &get_props);
     if (errno) {
         return false;
     }
 
     prop_decoder decoder { buffer };
-    return decoder.decode(constants_);
+    return decoder.decode(info_);
 }
 
 }

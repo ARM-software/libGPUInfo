@@ -23,9 +23,29 @@
  */
 
 /**
- * @file
+ * @brief The core libGPUInfo library interface.
  *
- * Mali device driver instance header.
+ * This library provides developers with an easy way to query the Arm
+ * Immortalis or Arm Mali GPU configuration in their system.  This information
+ * can be used to adjust rendering workload to match the capabilities of the
+ * device.
+ *
+ * The library is simple to use:
+ *
+ *     // Create a connection with the kernel driver ...
+ *     std::unique_ptr<instance> conn = libgpuinfo::instance::create();
+ *     if (!conn)
+ *     {
+ *         std::cout << "ERROR: Failed to create Mali instance\n";
+ *         return;
+ *     }
+ *
+ *     // Fetch the information result and do something with it ...
+ *     const gpuinfo& info = conn->get_info();
+ *     std::cout << "GPU: " << info.gpu_name << " MP" << info.num_shader_cores << "\n";
+ *
+ * Note that the returned information object is returned by reference, and has
+ * the same lifetime as the instance object.
  */
 
 #pragma once
@@ -68,19 +88,19 @@ struct gpuinfo
     /** GPU external bus width per cache slice, in bits */
     uint32_t num_bus_bits;
 
-    /** Number of execution engines per core. */
+    /** Number of execution engines per core */
     uint32_t num_exec_engines;
 
-    /** Maximum number of 32-bit floating-point FMAs per clock per core. */
+    /** Maximum number of 32-bit floating-point FMAs per clock per core */
     uint32_t num_fp32_fmas_per_cy;
 
-    /** Maximum number of 16-bit floating-point FMAs per clock per core. */
+    /** Maximum number of 16-bit floating-point FMAs per clock per core */
     uint32_t num_fp16_fmas_per_cy;
 
-    /** Maximum number of bilinear filtered texels per clock per core. */
+    /** Maximum number of bilinear filtered texels per clock per core */
     uint32_t num_texels_per_cy;
 
-    /** Maximum number of output pixels per clock per core. */
+    /** Maximum number of output pixels per clock per core */
     uint32_t num_pixels_per_cy;
 };
 
@@ -102,49 +122,64 @@ public:
     /**
      * Factory function to create a device instance.
      *
-     * @param[in] id   The driver instance, e.g. 0 for /dev/mali0.
+     * @param id   The driver instance, e.g. 0 for /dev/mali0.
      *
      * @return The created instance, or @c nullptr on failure.
      */
-    static std::unique_ptr<instance> create(uint32_t id=0);
+    static std::unique_ptr<instance> create(const uint32_t id=0);
 
     /**
-     * Get the GPU device constants.
+     * Get the GPU device property information.
      *
-     * @return The device constants.
+     * The returned reference has the same lifetime as the instance.
+     *
+     * @return The device property information.
      */
     const gpuinfo& get_info() const;
 
     /**
-     * Destroy an instance, closing the device fd.
+     * Destroy an instance.
+     *
+     * Any returned information references become invalid.
      */
     ~instance();
 
 private:
+    /**
+     * Create a new instance.
+     *
+     * @param fd   The opened driver file descriptor.
+     *
+     */
     instance(int fd);
 
-    /** Detect Mali kernel interface version. */
-    bool version_check();
+    /** Check the Mali kernel driver interface version. */
+    bool check_version();
 
-    /** Configure Mali kernel connection flags. */
+    /** Configure Mali kernel driver connection flags. */
     bool set_flags();
 
-    /** Initialize constants_ field. */
-    bool init_constants();
+    /** Query properties and store them locally. */
+    bool init_props();
 
-    /** Get device constants from old ioctl. */
-    bool props_pre_r21(int fd);
+    /** Get device constants from the old format ioctl. */
+    bool init_props_pre_r21();
 
-    /** Get the raw properties buffer as it's returned from the kernel. */
-    bool props_post_r21(int fd);
+    /** Get device constants from the new format ioctl. */
+    bool init_props_post_r21();
 
-    gpuinfo constants_ {};
+    /** The queries device properties. */
+    gpuinfo info_ {};
+
+    /** The driver interface type. */
     iface_type iface_ {};
 
+    /** The validity state of the object if initialization fails. */
     bool valid_ { true };
-    int fd_;
-};
 
+    /** The kernel driver file descriptor. */
+    int fd_ {};
+};
 
 /** Kbase Pre R21 ioctl interface. */
 namespace kbase_pre_r21 {
@@ -474,7 +509,7 @@ enum command_type {
 
 }
 
-/** Kbase ioctl interface. */
+/** Kbase Post R21 ioctl interface. */
 namespace kbase_post_r21 {
 
 template <typename value_t>
