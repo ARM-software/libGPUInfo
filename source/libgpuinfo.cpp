@@ -140,7 +140,7 @@ static uint32_t get_num_ee_g310_g510(
     return 2;
 }
 
-const std::array<product_entry, 30> PRODUCT_VERSIONS {{
+const std::array<product_entry, 32> PRODUCT_VERSIONS {{
     //                  ID,  ID Mask, Min cores,              Name,      Args, FMA,    Texels,    Pixels,   Engines
     product_entry { 0x6956, MASK_OLD,         1,       "Mali-T600", "Midgard",  4, get_num_1, get_num_1, get_num_2 },
     product_entry { 0x0620, MASK_OLD,         1,       "Mali-T620", "Midgard",  4, get_num_1, get_num_1, get_num_2 },
@@ -164,16 +164,18 @@ const std::array<product_entry, 30> PRODUCT_VERSIONS {{
     product_entry { 0x9005, MASK_NEW,         1,      "Mali-G78AE", "Valhall", 16, get_num_4, get_num_2, get_num_2 },
     product_entry { 0xa002, MASK_NEW,         1,       "Mali-G710", "Valhall", 32, get_num_8, get_num_4, get_num_2 },
     product_entry { 0xa007, MASK_NEW,         1,       "Mali-G610", "Valhall", 32, get_num_8, get_num_4, get_num_2 },
-    // TODO: Extract FMA, pixel, and texel settings
+    // TODO: Extract Mali-G510 FMA, pixel, and texel settings from core_variant field
     product_entry { 0xa003, MASK_NEW,         1,       "Mali-G510", "Valhall", 32, get_num_8, get_num_4, get_num_ee_g310_g510 },
-    // TODO: Extract FMA, pixel, and texel settings
+    // TODO: Extract Mali-G310 FMA, pixel, and texel settings from core_variant field
     product_entry { 0xa004, MASK_NEW,         1,       "Mali-G310", "Valhall", 32, get_num_8, get_num_4, get_num_ee_g310_g510 },
     product_entry { 0xb002, MASK_NEW,        10, "Immortalis-G715", "Valhall", 64, get_num_8, get_num_4, get_num_2 },
-    product_entry { 0xb003, MASK_NEW,        10, "Immortalis-G715", "Valhall", 64, get_num_8, get_num_4, get_num_2 },
     product_entry { 0xb002, MASK_NEW,         7,       "Mali-G715", "Valhall", 64, get_num_8, get_num_4, get_num_2 },
-    product_entry { 0xb003, MASK_NEW,         7,       "Mali-G715", "Valhall", 64, get_num_8, get_num_4, get_num_2 },
     product_entry { 0xb002, MASK_NEW,         1,       "Mali-G615", "Valhall", 64, get_num_8, get_num_4, get_num_2 },
     product_entry { 0xb003, MASK_NEW,         1,       "Mali-G615", "Valhall", 64, get_num_8, get_num_4, get_num_2 },
+    product_entry { 0xc000, MASK_NEW,        10, "Immortalis-G720", "Valhall", 64, get_num_8, get_num_4, get_num_2 },
+    product_entry { 0xc000, MASK_NEW,         7,       "Mali-G720", "Valhall", 64, get_num_8, get_num_4, get_num_2 },
+    product_entry { 0xc000, MASK_NEW,         1,       "Mali-G620", "Valhall", 64, get_num_8, get_num_4, get_num_2 },
+    product_entry { 0xc001, MASK_NEW,         1,       "Mali-G620", "Valhall", 64, get_num_8, get_num_4, get_num_2 },
 }};
 
 uint32_t get_gpu_id(
