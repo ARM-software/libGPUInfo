@@ -46,7 +46,7 @@ struct product_entry {
     uint32_t min_cores;
     const char* name;
     const char* architecture;
-    uint32_t fp32_fmas_per_engine;
+    std::function<uint32_t(int, uint32_t, uint32_t)> get_num_fp32_fmas_per_engine;
     std::function<uint32_t(int, uint32_t, uint32_t)> get_num_texels;
     std::function<uint32_t(int, uint32_t, uint32_t)> get_num_pixels;
     std::function<uint32_t(int, uint32_t, uint32_t)> get_num_exec_engines;
@@ -55,44 +55,13 @@ struct product_entry {
 static const uint32_t MASK_OLD { 0xFFFF };
 static const uint32_t MASK_NEW { 0xF00F };
 
-static uint32_t get_num_1(
+template <uint32_t val>
+static uint32_t get_num(
     int core_count,
     uint32_t core_features,
     uint32_t thread_features
 ) {
-    return 1;
-}
-
-static uint32_t get_num_2(
-    int core_count,
-    uint32_t core_features,
-    uint32_t thread_features
-) {
-    return 2;
-}
-
-static uint32_t get_num_3(
-    int core_count,
-    uint32_t core_features,
-    uint32_t thread_features
-) {
-    return 3;
-}
-
-static uint32_t get_num_4(
-    int core_count,
-    uint32_t core_features,
-    uint32_t thread_features
-) {
-    return 4;
-}
-
-static uint32_t get_num_8(
-    int core_count,
-    uint32_t core_features,
-    uint32_t thread_features
-) {
-    return 8;
+    return val;
 }
 
 static uint32_t get_num_ee_g31(
@@ -141,41 +110,41 @@ static uint32_t get_num_ee_g310_g510(
 }
 
 const std::array<product_entry, 32> PRODUCT_VERSIONS {{
-    //                  ID,  ID Mask, Min cores,              Name,      Args, FMA,    Texels,    Pixels,   Engines
-    product_entry { 0x6956, MASK_OLD,         1,       "Mali-T600", "Midgard",   4, get_num_1, get_num_1, get_num_2 },
-    product_entry { 0x0620, MASK_OLD,         1,       "Mali-T620", "Midgard",   4, get_num_1, get_num_1, get_num_2 },
-    product_entry { 0x0720, MASK_OLD,         1,       "Mali-T720", "Midgard",   4, get_num_1, get_num_1, get_num_1 },
-    product_entry { 0x0750, MASK_OLD,         1,       "Mali-T760", "Midgard",   4, get_num_1, get_num_1, get_num_2 },
-    product_entry { 0x0820, MASK_OLD,         1,       "Mali-T820", "Midgard",   4, get_num_1, get_num_1, get_num_1 },
-    product_entry { 0x0830, MASK_OLD,         1,       "Mali-T830", "Midgard",   4, get_num_1, get_num_1, get_num_2 },
-    product_entry { 0x0860, MASK_OLD,         1,       "Mali-T860", "Midgard",   4, get_num_1, get_num_1, get_num_2 },
-    product_entry { 0x0880, MASK_OLD,         1,       "Mali-T880", "Midgard",   4, get_num_1, get_num_1, get_num_3 },
-    product_entry { 0x6000, MASK_NEW,         1,        "Mali-G71", "Bifrost",   4, get_num_1, get_num_1, get_num_3 },
-    product_entry { 0x6001, MASK_NEW,         1,        "Mali-G72", "Bifrost",   4, get_num_1, get_num_1, get_num_3 },
-    product_entry { 0x7000, MASK_NEW,         1,        "Mali-G51", "Bifrost",   4, get_num_2, get_num_2, get_num_ee_g51 },
-    product_entry { 0x7001, MASK_NEW,         1,        "Mali-G76", "Bifrost",   8, get_num_2, get_num_2, get_num_3 },
-    product_entry { 0x7002, MASK_NEW,         1,        "Mali-G52", "Bifrost",   8, get_num_2, get_num_2, get_num_ee_g52 },
-    product_entry { 0x7003, MASK_NEW,         1,        "Mali-G31", "Bifrost",   4, get_num_2, get_num_2, get_num_ee_g31 },
-    product_entry { 0x9000, MASK_NEW,         1,        "Mali-G77", "Valhall",  16, get_num_4, get_num_2, get_num_2 },
-    product_entry { 0x9001, MASK_NEW,         1,        "Mali-G57", "Valhall",  16, get_num_4, get_num_2, get_num_2 },
-    product_entry { 0x9003, MASK_NEW,         1,        "Mali-G57", "Valhall",  16, get_num_4, get_num_2, get_num_2 },
-    product_entry { 0x9004, MASK_NEW,         1,        "Mali-G68", "Valhall",  16, get_num_4, get_num_2, get_num_2 },
-    product_entry { 0x9002, MASK_NEW,         1,        "Mali-G78", "Valhall",  16, get_num_4, get_num_2, get_num_2 },
-    product_entry { 0x9005, MASK_NEW,         1,      "Mali-G78AE", "Valhall",  16, get_num_4, get_num_2, get_num_2 },
-    product_entry { 0xa002, MASK_NEW,         1,       "Mali-G710", "Valhall",  32, get_num_8, get_num_4, get_num_2 },
-    product_entry { 0xa007, MASK_NEW,         1,       "Mali-G610", "Valhall",  32, get_num_8, get_num_4, get_num_2 },
+    //                  ID,  ID Mask, Min cores,              Name,      Arch,          FMA,     Texels,     Pixels,    Engines
+    product_entry { 0x6956, MASK_OLD,         1,       "Mali-T600", "Midgard",   get_num<4>, get_num<1>, get_num<1>, get_num<2> },
+    product_entry { 0x0620, MASK_OLD,         1,       "Mali-T620", "Midgard",   get_num<4>, get_num<1>, get_num<1>, get_num<2> },
+    product_entry { 0x0720, MASK_OLD,         1,       "Mali-T720", "Midgard",   get_num<4>, get_num<1>, get_num<1>, get_num<1> },
+    product_entry { 0x0750, MASK_OLD,         1,       "Mali-T760", "Midgard",   get_num<4>, get_num<1>, get_num<1>, get_num<2> },
+    product_entry { 0x0820, MASK_OLD,         1,       "Mali-T820", "Midgard",   get_num<4>, get_num<1>, get_num<1>, get_num<1> },
+    product_entry { 0x0830, MASK_OLD,         1,       "Mali-T830", "Midgard",   get_num<4>, get_num<1>, get_num<1>, get_num<2> },
+    product_entry { 0x0860, MASK_OLD,         1,       "Mali-T860", "Midgard",   get_num<4>, get_num<1>, get_num<1>, get_num<2> },
+    product_entry { 0x0880, MASK_OLD,         1,       "Mali-T880", "Midgard",   get_num<4>, get_num<1>, get_num<1>, get_num<3> },
+    product_entry { 0x6000, MASK_NEW,         1,        "Mali-G71", "Bifrost",   get_num<4>, get_num<1>, get_num<1>, get_num<3> },
+    product_entry { 0x6001, MASK_NEW,         1,        "Mali-G72", "Bifrost",   get_num<4>, get_num<1>, get_num<1>, get_num<3> },
+    product_entry { 0x7000, MASK_NEW,         1,        "Mali-G51", "Bifrost",   get_num<4>, get_num<2>, get_num<2>, get_num_ee_g51 },
+    product_entry { 0x7001, MASK_NEW,         1,        "Mali-G76", "Bifrost",   get_num<8>, get_num<2>, get_num<2>, get_num<3> },
+    product_entry { 0x7002, MASK_NEW,         1,        "Mali-G52", "Bifrost",   get_num<8>, get_num<2>, get_num<2>, get_num_ee_g52 },
+    product_entry { 0x7003, MASK_NEW,         1,        "Mali-G31", "Bifrost",   get_num<4>, get_num<2>, get_num<2>, get_num_ee_g31 },
+    product_entry { 0x9000, MASK_NEW,         1,        "Mali-G77", "Valhall",  get_num<16>, get_num<4>, get_num<2>, get_num<2> },
+    product_entry { 0x9001, MASK_NEW,         1,        "Mali-G57", "Valhall",  get_num<16>, get_num<4>, get_num<2>, get_num<2> },
+    product_entry { 0x9003, MASK_NEW,         1,        "Mali-G57", "Valhall",  get_num<16>, get_num<4>, get_num<2>, get_num<2> },
+    product_entry { 0x9004, MASK_NEW,         1,        "Mali-G68", "Valhall",  get_num<16>, get_num<4>, get_num<2>, get_num<2> },
+    product_entry { 0x9002, MASK_NEW,         1,        "Mali-G78", "Valhall",  get_num<16>, get_num<4>, get_num<2>, get_num<2> },
+    product_entry { 0x9005, MASK_NEW,         1,      "Mali-G78AE", "Valhall",  get_num<16>, get_num<4>, get_num<2>, get_num<2> },
+    product_entry { 0xa002, MASK_NEW,         1,       "Mali-G710", "Valhall",  get_num<32>, get_num<8>, get_num<4>, get_num<2> },
+    product_entry { 0xa007, MASK_NEW,         1,       "Mali-G610", "Valhall",  get_num<32>, get_num<8>, get_num<4>, get_num<2> },
     // TODO: Extract Mali-G510 FMA, pixel, and texel settings from core_variant field
-    product_entry { 0xa003, MASK_NEW,         1,       "Mali-G510", "Valhall",  32, get_num_8, get_num_4, get_num_ee_g310_g510 },
+    product_entry { 0xa003, MASK_NEW,         1,       "Mali-G510", "Valhall",  get_num<32>, get_num<8>, get_num<4>, get_num_ee_g310_g510 },
     // TODO: Extract Mali-G310 FMA, pixel, and texel settings from core_variant field
-    product_entry { 0xa004, MASK_NEW,         1,       "Mali-G310", "Valhall",  32, get_num_8, get_num_4, get_num_ee_g310_g510 },
-    product_entry { 0xb002, MASK_NEW,        10, "Immortalis-G715", "Valhall",  64, get_num_8, get_num_4, get_num_2 },
-    product_entry { 0xb002, MASK_NEW,         7,       "Mali-G715", "Valhall",  64, get_num_8, get_num_4, get_num_2 },
-    product_entry { 0xb002, MASK_NEW,         1,       "Mali-G615", "Valhall",  64, get_num_8, get_num_4, get_num_2 },
-    product_entry { 0xb003, MASK_NEW,         1,       "Mali-G615", "Valhall",  64, get_num_8, get_num_4, get_num_2 },
-    product_entry { 0xc000, MASK_NEW,        10, "Immortalis-G720", "Valhall",  64, get_num_8, get_num_4, get_num_2 },
-    product_entry { 0xc000, MASK_NEW,         7,       "Mali-G720", "Valhall",  64, get_num_8, get_num_4, get_num_2 },
-    product_entry { 0xc000, MASK_NEW,         1,       "Mali-G620", "Valhall",  64, get_num_8, get_num_4, get_num_2 },
-    product_entry { 0xc001, MASK_NEW,         1,       "Mali-G620", "Valhall",  64, get_num_8, get_num_4, get_num_2 },
+    product_entry { 0xa004, MASK_NEW,         1,       "Mali-G310", "Valhall",  get_num<32>, get_num<8>, get_num<4>, get_num_ee_g310_g510 },
+    product_entry { 0xb002, MASK_NEW,        10, "Immortalis-G715", "Valhall",  get_num<64>, get_num<8>, get_num<4>, get_num<2> },
+    product_entry { 0xb002, MASK_NEW,         7,       "Mali-G715", "Valhall",  get_num<64>, get_num<8>, get_num<4>, get_num<2> },
+    product_entry { 0xb002, MASK_NEW,         1,       "Mali-G615", "Valhall",  get_num<64>, get_num<8>, get_num<4>, get_num<2> },
+    product_entry { 0xb003, MASK_NEW,         1,       "Mali-G615", "Valhall",  get_num<64>, get_num<8>, get_num<4>, get_num<2> },
+    product_entry { 0xc000, MASK_NEW,        10, "Immortalis-G720", "Valhall",  get_num<64>, get_num<8>, get_num<4>, get_num<2> },
+    product_entry { 0xc000, MASK_NEW,         7,       "Mali-G720", "Valhall",  get_num<64>, get_num<8>, get_num<4>, get_num<2> },
+    product_entry { 0xc000, MASK_NEW,         1,       "Mali-G620", "Valhall",  get_num<64>, get_num<8>, get_num<4>, get_num<2> },
+    product_entry { 0xc001, MASK_NEW,         1,       "Mali-G620", "Valhall",  get_num<64>, get_num<8>, get_num<4>, get_num<2> },
 }};
 
 uint32_t get_gpu_id(
@@ -251,7 +220,8 @@ const uint32_t get_num_fp32_fmas(
         if(((gpu_id & entry.mask) == entry.id) &&
            (core_count >= entry.min_cores))
         {
-            return entry.fp32_fmas_per_engine * entry.get_num_exec_engines(core_count, core_features, thread_features);
+            return entry.get_num_fp32_fmas_per_engine(core_count, core_features, thread_features) *
+                   entry.get_num_exec_engines(core_count, core_features, thread_features);
         }
     }
 
