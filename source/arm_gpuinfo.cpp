@@ -38,6 +38,11 @@
  *     adb push arm_gpuinfo /data/local/tmp
  *     adb shell chmod u+x /data/local/tmp/arm_gpuinfo
  *     adb shell /data/local/tmp/arm_gpuinfo
+ *
+ * The generated output is formatted using a YAML-like syntax, but by default is
+ * designed for human consumption with additional line breaks. To generate
+ * strictly compliant YAML output for use in scripts pass the --yaml or -y
+ * argument on the arm_gpuinfo command line.
  */
 
 #include <iostream>
@@ -73,8 +78,17 @@ std::string get_kernel_version() {
     return { unamedata.release };
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
+    bool emit_yaml = false;
+    for (int i = 1; i < argc; i++)
+    {
+        if ((!strcmp(argv[i], "-y")) || (!strcmp(argv[i], "--yaml")))
+        {
+            emit_yaml = true;
+        }
+    }
+
     auto instance = libgpuinfo::instance::create();
     if (!instance)
     {
@@ -84,39 +98,56 @@ int main(void)
 
     const auto info = instance->get_info();
 
-    std::cout << "Device configuration\n";
+    if (emit_yaml)
+    {
+        std::cout << "---\n";
+    }
+
+    std::cout << "Device configuration:\n";
 #if defined(__ANDROID__)
-    std::cout << "  - Manufacturer: " << get_android_property("ro.product.vendor.manufacturer", "ro.product.brand") << "\n";
-    std::cout << "  - Model: " << get_android_property("ro.product.vendor.model", "ro.product.model") << "\n";
-    std::cout << "  - Android version: " << get_android_property("ro.build.version.release") << "\n";
+    std::cout << "  Manufacturer: " << get_android_property("ro.product.vendor.manufacturer", "ro.product.brand") << "\n";
+    std::cout << "  Model: " << get_android_property("ro.product.vendor.model", "ro.product.model") << "\n";
+    std::cout << "  Android version: " << get_android_property("ro.build.version.release") << "\n";
 #endif
-    std::cout << "  - Kernel version: " << get_kernel_version() << "\n";
-    std::cout << "\n";
+    std::cout << "  Kernel version: " << get_kernel_version() << "\n";
+    if (!emit_yaml)
+    {
+        std::cout << "\n";
+    }
 
-    std::cout << "GPU configuration\n";
-    std::cout << "  - Name: " << info.gpu_name << "\n";
-    std::cout << "  - Architecture: " << info.architecture_name << "\n";
-    std::cout << "  - Model number: 0x" << std::hex << info.gpu_id << std::dec << "\n";
-    std::cout << "  - Core count: " << info.num_shader_cores << "\n";
-    std::cout << "  - L2 cache count: " << info.num_l2_slices << "\n";
-    std::cout << "  - Total L2 cache size: " << info.num_l2_bytes << " bytes\n";
-    std::cout << "  - Bus width: " << info.num_bus_bits << " bits\n";
-    std::cout << "\n";
+    std::cout << "GPU configuration:\n";
+    std::cout << "  Name: " << info.gpu_name << "\n";
+    std::cout << "  Architecture: " << info.architecture_name << "\n";
+    std::cout << "  Model number: 0x" << std::hex << info.gpu_id << std::dec << "\n";
+    std::cout << "  Core count: " << info.num_shader_cores << "\n";
+    std::cout << "  L2 cache count: " << info.num_l2_slices << "\n";
+    std::cout << "  Total L2 cache size: " << info.num_l2_bytes << " bytes\n";
+    std::cout << "  Bus width: " << info.num_bus_bits << " bits\n";
+    if (!emit_yaml)
+    {
+        std::cout << "\n";
+    }
 
-    std::cout << "Per-core statistics\n";
-    std::cout << "  - Engine count: " << info.num_exec_engines << "\n";
-    std::cout << "  - FP32 FMAs: " << info.num_fp32_fmas_per_cy << "/cy\n";
-    std::cout << "  - FP16 FMAs: " << info.num_fp16_fmas_per_cy << "/cy\n";
-    std::cout << "  - Texels: " << info.num_texels_per_cy << "/cy\n";
-    std::cout << "  - Pixels: " << info.num_pixels_per_cy << "/cy\n";
-    std::cout << "\n";
+    std::cout << "Per-core statistics:\n";
+    std::cout << "  Engine count: " << info.num_exec_engines << "\n";
+    std::cout << "  FP32 FMAs: " << info.num_fp32_fmas_per_cy << "/cy\n";
+    std::cout << "  FP16 FMAs: " << info.num_fp16_fmas_per_cy << "/cy\n";
+    std::cout << "  Texels: " << info.num_texels_per_cy << "/cy\n";
+    std::cout << "  Pixels: " << info.num_pixels_per_cy << "/cy\n";
+    if (!emit_yaml)
+    {
+        std::cout << "\n";
+    }
 
-    std::cout << "Per-GPU statistics\n";
-    std::cout << "  - FP32 FMAs: " << info.num_fp32_fmas_per_cy * info.num_shader_cores << "/cy\n";
-    std::cout << "  - FP16 FMAs: " << info.num_fp16_fmas_per_cy * info.num_shader_cores << "/cy\n";
-    std::cout << "  - Texels: " << info.num_texels_per_cy * info.num_shader_cores << "/cy\n";
-    std::cout << "  - Pixels: " << info.num_pixels_per_cy * info.num_shader_cores << "/cy\n";
-    std::cout << "\n";
+    std::cout << "Per-GPU statistics:\n";
+    std::cout << "  FP32 FMAs: " << info.num_fp32_fmas_per_cy * info.num_shader_cores << "/cy\n";
+    std::cout << "  FP16 FMAs: " << info.num_fp16_fmas_per_cy * info.num_shader_cores << "/cy\n";
+    std::cout << "  Texels: " << info.num_texels_per_cy * info.num_shader_cores << "/cy\n";
+    std::cout << "  Pixels: " << info.num_pixels_per_cy * info.num_shader_cores << "/cy\n";
+    if (!emit_yaml)
+    {
+        std::cout << "\n";
+    }
 
     return 0;
 }

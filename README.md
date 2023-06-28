@@ -95,8 +95,11 @@ file. It is expected that developers will copy the libgpuinfo files directly
 into their existing application build system, so no off-the-shelf build system
 is provided for the library integration.
 
-You can also build a simple command line tool that can be used for adhoc
-testing of devices. To build the Android command line tool:
+# Sample application
+
+The repository also contains a simple command line tool that demonstrates use of
+the API, and which can be used for adhoc testing of devices. To build the
+Android command line tool:
 
 * Set `ANDROID_NDK_HOME` to the path of your Android NDK install.
 * Run `./android_build.sh [Release|Debug]`.
@@ -105,12 +108,17 @@ The output binary will be `./bin/arm_gpuinfo`. You can run this on the device
 and print the results for your device to the terminal using the following
 commands:
 
-```
+```sh
 adb push ./bin/arm_gpuinfo /data/local/tmp
 adb shell chmod u+x /data/local/tmp/arm_gpuinfo
 adb shell /data/local/tmp/arm_gpuinfo
 adb shell rm /data/local/tmp/arm_gpuinfo
 ```
+
+The generated output is formatted using a YAML-like syntax, but is designed for
+human consumption with additional line breaks. To generate strictly compliant
+YAML output for use in scripts pass the `--yaml` or `-y` argument on the
+`arm_gpuinfo` command line.
 
 # Support
 
