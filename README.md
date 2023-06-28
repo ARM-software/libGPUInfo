@@ -7,7 +7,7 @@ match the performance capability of the current device.
 
 This library is able to provide the Arm GPU hardware configuration, as well as
 performance metrics for the shader cores inside the GPU. The library is unable
-to provide system infomation, such as the available GPU clock frequencies,
+to provide system information, such as the available GPU clock frequencies,
 because this is provided by the device manufacturer and is not part of the Arm
 GPU itself.
 
@@ -58,7 +58,8 @@ The query mechanism can report the following information about the GPU:
 * **L2 cache size:** The total L2 cache size, summed over all slices, in bytes.
 * **Bus size:** The width of the external data bus, per cache slice, in bits.
 
-The query mechanism can report the following per-core shader core information:
+The query mechanism can report the following per-core shader core performance
+information:
 
 * **Execution engine count:** The number of arithmetic macroblocks.
 * **FP32 FMA count:** The peak fp32 FMAs per clock, summed over all engines.
@@ -87,6 +88,36 @@ std::cout << "GPU: " << info.gpu_name << " MP" << info.num_shader_cores << "\n";
 Note that the returned instance uses a unique pointer for lifetime management,
 and both the instance and the query result will be freed when the instance
 drops out of scope.
+
+## Handling unknown devices
+
+The library will be regularly updated to support new Arm GPU products, but it
+is inevitable that applications will run on new devices with GPU models that
+did not exist at the time they were released. For this there are two failure
+modes that applications must consider.
+
+The most likely error is the case where a connection can be established with
+the Arm kernel driver, but the product code is unknown. In this case the call
+to `libgpuinfo::instance::create()` will succeed but return a partially
+populated result. It will include any information that can be determined
+programmatically, but will report the GPU name and architecture as "Unknown",
+and the per-core shader core performance metrics as zero.
+
+For example, we can currently show the following information when the product
+model is not explicitly supported:
+
+```yaml
+GPU configuration:
+  Model number: 0xa862
+  Core count: 7
+  L2 cache count: 4
+  Total L2 cache size: 2097152 bytes
+  Bus width: 256 bits
+```
+
+If the kernel driver interface has changed and the library cannot establish a
+connection then we can return no useful information. In this case the
+`libgpuinfo::instance::create()` function will fail and will return a `nullptr`.
 
 # Building
 

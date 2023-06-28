@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     auto instance = libgpuinfo::instance::create();
     if (!instance)
     {
-        std::cout << "ERROR: Failed to create Mali instance\n";
+        std::cout << "ERROR: Failed to create instance\n";
         return 1;
     }
 
@@ -128,6 +128,13 @@ int main(int argc, char *argv[])
         std::cout << "\n";
     }
 
+    if (!info.num_exec_engines)
+    {
+        std::cout << "ERROR: Detected an unknown model "
+                  << std::hex << info.gpu_id << std::dec << "\n";
+        return 1;
+    }
+
     std::cout << "Per-core statistics:\n";
     std::cout << "  Engine count: " << info.num_exec_engines << "\n";
     std::cout << "  FP32 FMAs: " << info.num_fp32_fmas_per_cy << "/cy\n";
@@ -144,10 +151,6 @@ int main(int argc, char *argv[])
     std::cout << "  FP16 FMAs: " << info.num_fp16_fmas_per_cy * info.num_shader_cores << "/cy\n";
     std::cout << "  Texels: " << info.num_texels_per_cy * info.num_shader_cores << "/cy\n";
     std::cout << "  Pixels: " << info.num_pixels_per_cy * info.num_shader_cores << "/cy\n";
-    if (!emit_yaml)
-    {
-        std::cout << "\n";
-    }
 
     return 0;
 }

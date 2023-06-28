@@ -233,7 +233,7 @@ const char* get_gpu_name(
         }
     }
 
-    return "Unknown gpu_id";
+    return "Unknown";
 }
 
 const char* get_architecture_name(
@@ -247,7 +247,7 @@ const char* get_architecture_name(
         }
     }
 
-    return "Unknown gpu_id";
+    return "Unknown";
 }
 
 int get_num_exec_engines(
@@ -858,10 +858,6 @@ class prop_decoder {
             info.num_shader_cores,
             raw_core_features,
             raw_thread_features);
-
-        if (!info.num_exec_engines) {
-            return false;
-        }
 
         info.num_fp32_fmas_per_cy = get_num_fp32_fmas(
             info.gpu_id,
