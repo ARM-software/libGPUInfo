@@ -23,6 +23,7 @@
  */
 
 #include <array>
+#include <cassert>
 #include <cerrno>
 #include <cstdint>
 #include <functional>
@@ -833,7 +834,7 @@ class prop_decoder {
                 info.num_l2_slices = value;
                 break;
             case prop_id_t::raw_l2_features:
-                /* log2(bus width) stored in top 8 bits of register. */
+                // Bus width stored as log2(bus width) in top 8 bits
                 info.num_bus_bits = 1UL << ((value >> 24) & 0xFF);
                 break;
             case prop_id_t::raw_core_features:
@@ -842,11 +843,13 @@ class prop_decoder {
             case prop_id_t::raw_thread_features:
                 raw_thread_features = value;
                 break;
+            case prop_id_t::coherency_num_core_groups:
+                // Only expect 1 core group in Mali-T700 onwards
+                assert(value == 1);
+                break;
             case prop_id_t::coherency_group_0:
-            case prop_id_t::coherency_group_1:
-            case prop_id_t::coherency_group_2:
-            case prop_id_t::coherency_group_3:
-                info.num_shader_cores += __builtin_popcount(value);
+                info.num_shader_cores = __builtin_popcount(value);
+                info.shader_core_mask = value;
                 break;
             default:
                 break;
@@ -1105,9 +1108,12 @@ bool instance::init_props_pre_r21() {
     info_.num_bus_bits = 1UL << (props.props.raw_props.l2_features >> 24);
 
     info_.num_shader_cores = 0;
+    // Only expect 1 core group in Mali-T700 onwards
+    assert(props.props.coherency_info.num_core_groups == 1);
     for (uint32_t i = 0; i < props.props.coherency_info.num_core_groups; i++)
     {
-        info_.num_shader_cores += __builtin_popcount(props.props.coherency_info.group[i].core_mask);
+        info_.num_shader_cores = __builtin_popcount(props.props.coherency_info.group[i].core_mask);
+        info_.shader_core_mask = props.props.coherency_info.group[i].core_mask;
     }
 
     info_.num_exec_engines = get_num_exec_engines(

@@ -120,6 +120,7 @@ int main(int argc, char *argv[])
     std::cout << "  Architecture: " << info.architecture_name << "\n";
     std::cout << "  Model number: 0x" << std::hex << info.gpu_id << std::dec << "\n";
     std::cout << "  Core count: " << info.num_shader_cores << "\n";
+    std::cout << "  Core mask: 0x" << std::hex << info.shader_core_mask << std::dec << "\n";
     std::cout << "  L2 cache count: " << info.num_l2_slices << "\n";
     std::cout << "  Total L2 cache size: " << info.num_l2_bytes << " bytes\n";
     std::cout << "  Bus width: " << info.num_bus_bits << " bits\n";
