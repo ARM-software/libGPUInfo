@@ -54,6 +54,7 @@ The query mechanism can report the following information about the GPU:
 * **Architecture:** The product architecture name string, e.g. "Valhall".
 * **Model number:** The product ID number, e.g. 0xa002.
 * **Shader core count:** The number of shader cores in the design.
+* **Shader core mask:** The shader core topology mask.
 * **L2 cache count:** The number of L2 cache slices in the design.
 * **L2 cache size:** The total L2 cache size, summed over all slices, in bytes.
 * **Bus size:** The width of the external data bus, per cache slice, in bits.

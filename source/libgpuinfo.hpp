@@ -79,6 +79,9 @@ struct gpuinfo
     /** Number of shader cores */
     uint32_t num_shader_cores;
 
+    /** Shader core topology mask */
+    uint64_t shader_core_mask;
+
     /** Number of L2 cache slices */
     uint32_t num_l2_slices;
 
