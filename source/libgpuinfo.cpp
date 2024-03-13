@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 ARM Limited.
+ * Copyright (c) 2021-2024 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -114,6 +114,8 @@ static uint32_t get_num_fma_g510(
             return 24;
         case 1:
         case 4:
+        case 5:
+        case 6:
         default:
             return 32;
     }
@@ -128,9 +130,11 @@ static uint32_t get_num_tex_g510(
     switch(variant)
     {
         case 0:
+        case 5:
             return 2;
         case 1:
         case 2:
+        case 6:
             return 4;
         case 3:
         case 4:
@@ -144,12 +148,15 @@ static uint32_t get_num_pix_g510(
     uint32_t core_features,
     uint32_t thread_features
 ) {
+    // This returns min(blend, pixel)
     uint32_t variant = core_features & 0xF;
     switch(variant)
     {
         case 0:
-        case 1:
+        case 5:
+        case 6:
             return 2;
+        case 1:
         case 2:
         case 3:
         case 4:
@@ -163,12 +170,20 @@ static uint32_t get_num_eng_g510(
     uint32_t core_features,
     uint32_t thread_features
 ) {
-    if ((core_features & 0xF) <= 1)
+    uint32_t variant = core_features & 0xF;
+    switch(variant)
     {
-        return 1;
+        case 0:
+        case 1:
+        case 5:
+        case 6:
+            return 1;
+        case 2:
+        case 3:
+        case 4:
+        default:
+            return 2;
     }
-
-    return 2;
 }
 
 const std::array<product_entry, 32> PRODUCT_VERSIONS {{
