@@ -149,14 +149,15 @@ static uint32_t get_num_pix_g510(
     uint32_t thread_features
 ) {
     // This returns min(blend, pixel)
+    // Also limits to 2 for single engine configs
     uint32_t variant = core_features & 0xF;
     switch(variant)
     {
         case 0:
+        case 1:
         case 5:
         case 6:
             return 2;
-        case 1:
         case 2:
         case 3:
         case 4:
