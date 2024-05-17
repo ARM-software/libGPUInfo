@@ -163,7 +163,7 @@ or general mobile graphics development or technology please submit them on the
 
 - - -
 
-_Copyright © 2023, Arm Limited and contributors. All rights reserved._
+_Copyright © 2023-2024, Arm Limited and contributors. All rights reserved._
 
 [1]: https://community.arm.com/support-forums/f/graphics-gaming-and-vr-forum/
 [2]: https://developer.arm.com/documentation/102849/latest/

@@ -217,10 +217,10 @@ const std::array<product_entry, 32> PRODUCT_VERSIONS {{
     product_entry { 0xb002, MASK_NEW,         7,       "Mali-G715",      "Valhall",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
     product_entry { 0xb002, MASK_NEW,         1,       "Mali-G615",      "Valhall",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
     product_entry { 0xb003, MASK_NEW,         1,       "Mali-G615",      "Valhall",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry { 0xc000, MASK_NEW,        10, "Immortalis-G720", "Arm GPU Gen5",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry { 0xc000, MASK_NEW,         6,       "Mali-G720", "Arm GPU Gen5",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry { 0xc000, MASK_NEW,         1,       "Mali-G620", "Arm GPU Gen5",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry { 0xc001, MASK_NEW,         1,       "Mali-G620", "Arm GPU Gen5",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry { 0xc000, MASK_NEW,        10, "Immortalis-G720", "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry { 0xc000, MASK_NEW,         6,       "Mali-G720", "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry { 0xc000, MASK_NEW,         1,       "Mali-G620", "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry { 0xc001, MASK_NEW,         1,       "Mali-G620", "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
 }};
 
 uint32_t get_gpu_id(
