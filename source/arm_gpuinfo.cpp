@@ -47,6 +47,7 @@
 
 #include <iostream>
 #include <sys/utsname.h>
+#include <cstring>
 
 #if defined(__ANDROID__)
     #include <sys/system_properties.h>

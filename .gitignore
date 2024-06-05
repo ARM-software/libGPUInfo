@@ -3,6 +3,7 @@
 .vscode
 
 # Build and debug output files
+/.cache
 /bin*
 /build*
 /log*
