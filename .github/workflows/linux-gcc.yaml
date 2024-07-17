@@ -26,4 +26,4 @@ jobs:
       with:
         name: libgpu-linux-x86
         path: |
-          build/source/argpuinfo
+          build/source/arm_gpuinfo
