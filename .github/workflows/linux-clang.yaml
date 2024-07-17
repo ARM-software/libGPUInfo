@@ -14,12 +14,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Clang
-      run: sudo apt-get install -y clang
-
     - name: Build with Clang
       run: |
         mkdir -p build
         cd build
         cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
         make
+
+    - name: Upload binaries
+      uses: actions/upload-artifact@v4
+      with:
+        name: libgpu-linux-x86
+        path: |
+          build/*
