@@ -39,7 +39,7 @@
 
 #include "libgpuinfo.hpp"
 
-namespace libgpuinfo {
+namespace libarmgpuinfo {
 
 struct product_entry {
     uint32_t id;
