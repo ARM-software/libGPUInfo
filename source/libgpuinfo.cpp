@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 ARM Limited.
+ * Copyright (c) 2021-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -766,6 +766,8 @@ struct get_gpuprops_t {
         raw_l2_features = 29,
         /** Raw core features. */
         raw_core_features = 30,
+        /** Raw GPU id. */
+        raw_gpu_id = 55,
         /** Raw thread max threads. */
         raw_thread_max_threads = 56,
         /** Raw thread max workgroup size. */
@@ -830,6 +832,7 @@ class prop_decoder {
     bool decode(gpuinfo& info) {
         bool success = true;
 
+        uint64_t raw_gpu_id {};
         uint64_t raw_core_features {};
         uint64_t raw_thread_features {};
 
@@ -856,6 +859,9 @@ class prop_decoder {
                 // Bus width stored as log2(bus width) in top 8 bits
                 info.num_bus_bits = 1UL << ((value >> 24) & 0xFF);
                 break;
+            case prop_id_t::raw_gpu_id:
+                raw_gpu_id = value;
+                break;
             case prop_id_t::raw_core_features:
                 raw_core_features = value;
                 break;
@@ -873,6 +879,31 @@ class prop_decoder {
             default:
                 break;
             }
+        }
+
+        // Decode architecture versions
+        constexpr uint64_t bits4 { 0xF };
+        constexpr uint64_t bits8 { 0xFF };
+
+        constexpr uint64_t compat_shift { 28 };
+        constexpr uint64_t compat { 0xF };
+        bool is_64bit_id = ((raw_gpu_id >> compat_shift) & bits4) == compat;
+
+        // Old-style 32-bit ID
+        if (!is_64bit_id)
+        {
+            constexpr uint64_t arch_major_offset { 28 };
+            constexpr uint64_t arch_minor_offset { 24 };
+            info.architecture_major = (raw_gpu_id >> arch_major_offset) & bits4;
+            info.architecture_minor = (raw_gpu_id >> arch_minor_offset) & bits4;
+        }
+        // New-style 64-bit ID
+        else
+        {
+            constexpr uint64_t arch_major_offset { 56 };
+            constexpr uint64_t arch_minor_offset { 48 };
+            info.architecture_major = (raw_gpu_id >> arch_major_offset) & bits8;
+            info.architecture_minor = (raw_gpu_id >> arch_minor_offset) & bits8;
         }
 
         info.num_exec_engines = get_num_exec_engines(
@@ -1120,6 +1151,14 @@ bool instance::init_props_pre_r21() {
     if (errno) {
         return false;
     }
+
+    // Old core must have 32-bit GPU ID
+    uint32_t raw_gpu_id = props.props.raw_props.gpu_id;
+    constexpr unsigned int arch_major_offset { 28 };
+    constexpr unsigned int arch_minor_offset { 24 };
+    constexpr unsigned int nibble { 0xF };
+    info_.architecture_major = (raw_gpu_id >> arch_major_offset) & nibble;
+    info_.architecture_minor = (raw_gpu_id >> arch_minor_offset) & nibble;
 
     info_.gpu_id = props.props.core_props.product_id;
     info_.num_l2_bytes = 1UL << props.props.l2_props.log2_cache_size;
