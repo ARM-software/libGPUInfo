@@ -74,7 +74,7 @@ The library is very simple to use:
 
 ```C++
 // Create a connection with the kernel driver ...
-std::unique_ptr<instance> conn = libgpuinfo::instance::create();
+std::unique_ptr<instance> conn = libarmgpuinfo::instance::create();
 if (!conn)
 {
     std::cout << "ERROR: Failed to create Mali instance\n";
@@ -99,7 +99,7 @@ modes that applications must consider.
 
 The most likely error is the case where a connection can be established with
 the Arm kernel driver, but the product code is unknown. In this case the call
-to `libgpuinfo::instance::create()` will succeed but return a partially
+to `libarmgpuinfo::instance::create()` will succeed but return a partially
 populated result. It will include any information that can be determined
 programmatically, but will report the GPU name and architecture as "Unknown",
 and the per-core shader core performance metrics as zero.
@@ -118,14 +118,15 @@ GPU configuration:
 
 If the kernel driver interface has changed and the library cannot establish a
 connection then we can return no useful information. In this case the
-`libgpuinfo::instance::create()` function will fail and will return a `nullptr`.
+`libarmgpuinfo::instance::create()` function will fail and will return a
+`nullptr`.
 
 # Building
 
 The library is provided as a single C++ source file and a single C++ header
-file. It is expected that developers will copy the libgpuinfo files directly
-into their existing application build system, so no off-the-shelf build system
-is provided for the library integration.
+file. It is expected that developers will copy the files directly into their
+existing application build system, so no off-the-shelf build system is provided
+for the library integration.
 
 # Sample application
 
