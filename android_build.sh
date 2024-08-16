@@ -31,7 +31,7 @@ pushd ${BUILD_DIR_64}
 cmake \
     -DCMAKE_SYSTEM_NAME=Android \
     -DANDROID_PLATFORM=29 \
-    -DANDROID_ABI=arm64-v8a \
+    -DANDROID_ABI=armeabi-v7a \
     -DANDROID_TOOLCHAIN=clang \
     -DANDROID_STL=c++_static \
     -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \

@@ -233,7 +233,7 @@ uint32_t get_gpu_id(
     {
         if (((gpu_id & entry.mask) == entry.id))
         {
-            return gpu_id & entry.mask;
+            return entry.id;
         }
     }
 
@@ -246,8 +246,7 @@ const char* get_gpu_name(
 ) {
     for (const auto& entry : PRODUCT_VERSIONS)
     {
-        if(((gpu_id & entry.mask) == entry.id) &&
-           (core_count >= entry.min_cores))
+        if((gpu_id == entry.id) && (core_count >= entry.min_cores))
         {
             return entry.name;
         }
@@ -261,7 +260,7 @@ const char* get_architecture_name(
 ) {
     for (const auto& entry : PRODUCT_VERSIONS)
     {
-        if((gpu_id & entry.mask) == entry.id)
+        if(gpu_id == entry.id)
         {
             return entry.architecture;
         }
@@ -278,8 +277,7 @@ int get_num_exec_engines(
 ) {
     for (const auto& entry : PRODUCT_VERSIONS)
     {
-        if(((gpu_id & entry.mask) == entry.id) &&
-           (core_count >= entry.min_cores))
+        if((gpu_id == entry.id) && (core_count >= entry.min_cores))
         {
             return entry.get_num_exec_engines(core_count, core_features, thread_features);
         }
@@ -296,8 +294,7 @@ const uint32_t get_num_fp32_fmas(
 ) {
     for (const auto& entry : PRODUCT_VERSIONS)
     {
-        if(((gpu_id & entry.mask) == entry.id) &&
-           (core_count >= entry.min_cores))
+        if((gpu_id == entry.id) && (core_count >= entry.min_cores))
         {
             return entry.get_num_fp32_fmas_per_engine(core_count, core_features, thread_features) *
                    entry.get_num_exec_engines(core_count, core_features, thread_features);
@@ -315,8 +312,7 @@ const uint32_t get_num_texels(
 ) {
     for (const auto& entry : PRODUCT_VERSIONS)
     {
-        if(((gpu_id & entry.mask) == entry.id) &&
-           (core_count >= entry.min_cores))
+        if((gpu_id == entry.id) && (core_count >= entry.min_cores))
         {
             return entry.get_num_texels(core_count, core_features, thread_features);
         }
@@ -333,8 +329,7 @@ const uint32_t get_num_pixels(
 ) {
     for (const auto& entry : PRODUCT_VERSIONS)
     {
-        if(((gpu_id & entry.mask) == entry.id) &&
-           (core_count >= entry.min_cores))
+        if((gpu_id == entry.id) && (core_count >= entry.min_cores))
         {
             return entry.get_num_pixels(core_count, core_features, thread_features);
         }
@@ -847,7 +842,7 @@ class prop_decoder {
 
             switch (id) {
             case prop_id_t::product_id:
-                info.gpu_id = value;
+                info.gpu_id = get_gpu_id(value);
                 break;
             case prop_id_t::l2_log2_cache_size:
                 info.num_l2_bytes = 1UL << value;
@@ -1136,7 +1131,6 @@ bool instance::init_props() {
     info_.num_l2_bytes *= info_.num_l2_slices;
     info_.gpu_name = get_gpu_name(info_.gpu_id, info_.num_shader_cores);
     info_.architecture_name = get_architecture_name(info_.gpu_id);
-    info_.gpu_id = get_gpu_id(info_.gpu_id);
     return true;
 }
 
@@ -1152,18 +1146,50 @@ bool instance::init_props_pre_r21() {
         return false;
     }
 
-    // Old core must have 32-bit GPU ID
-    uint32_t raw_gpu_id = props.props.raw_props.gpu_id;
-    constexpr unsigned int arch_major_offset { 28 };
-    constexpr unsigned int arch_minor_offset { 24 };
-    constexpr unsigned int bits4 { 0xF };
-    info_.architecture_major = (raw_gpu_id >> arch_major_offset) & bits4;
-    info_.architecture_minor = (raw_gpu_id >> arch_minor_offset) & bits4;
-
-    info_.gpu_id = props.props.core_props.product_id;
+    info_.gpu_id = get_gpu_id(props.props.core_props.product_id);
     info_.num_l2_bytes = 1UL << props.props.l2_props.log2_cache_size;
     info_.num_l2_slices = props.props.l2_props.num_l2_slices;
     info_.num_bus_bits = 1UL << (props.props.raw_props.l2_features >> 24);
+
+    // Old core must have 32-bit GPU ID
+    switch (info_.gpu_id) {
+        case 0x6956: // Mali-T600
+            info_.architecture_major = 4;
+            info_.architecture_minor = 0;
+            break;
+        case 0x0620: // Mali-T620
+            info_.architecture_major = 4;
+            info_.architecture_minor = 1;
+            break;
+        case 0x0720: // Mali-T720
+            info_.architecture_major = 4;
+            info_.architecture_minor = 2;
+            break;
+        case 0x0750: // Mali-T760
+            info_.architecture_major = 5;
+            info_.architecture_minor = 0;
+            break;
+        case 0x0820: // Mali-T820
+        case 0x0830: // Mali-T830
+            info_.architecture_major = 5;
+            info_.architecture_minor = 1;
+            break;
+        case 0x0860: // Mali-T860
+        case 0x0880: // Mali-T880
+            info_.architecture_major = 5;
+            info_.architecture_minor = 2;
+            break;
+        default:
+        {
+            uint32_t raw_gpu_id = props.props.raw_props.gpu_id;
+            constexpr unsigned int arch_major_offset { 28 };
+            constexpr unsigned int arch_minor_offset { 24 };
+            constexpr unsigned int bits4 { 0xF };
+            info_.architecture_major = (raw_gpu_id >> arch_major_offset) & bits4;
+            info_.architecture_minor = (raw_gpu_id >> arch_minor_offset) & bits4;
+            break;
+        }
+    }
 
     info_.num_shader_cores = 0;
     // Only expect 1 core group in Mali-T700 onwards
