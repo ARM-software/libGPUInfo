@@ -1151,8 +1151,9 @@ bool instance::init_props_pre_r21() {
     info_.num_l2_slices = props.props.l2_props.num_l2_slices;
     info_.num_bus_bits = 1UL << (props.props.raw_props.l2_features >> 24);
 
-    // Old core must have 32-bit GPU ID
+    // Old kernel driver must have 32-bit GPU ID
     switch (info_.gpu_id) {
+        // Midgard GPUs require manual specification, as not machine readable
         case 0x6956: // Mali-T600
             info_.architecture_major = 4;
             info_.architecture_minor = 0;
@@ -1179,6 +1180,7 @@ bool instance::init_props_pre_r21() {
             info_.architecture_major = 5;
             info_.architecture_minor = 2;
             break;
+        // Bifrost onwards report architecture version via config register
         default:
         {
             uint32_t raw_gpu_id = props.props.raw_props.gpu_id;
