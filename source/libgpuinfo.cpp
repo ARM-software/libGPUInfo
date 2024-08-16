@@ -1156,9 +1156,9 @@ bool instance::init_props_pre_r21() {
     uint32_t raw_gpu_id = props.props.raw_props.gpu_id;
     constexpr unsigned int arch_major_offset { 28 };
     constexpr unsigned int arch_minor_offset { 24 };
-    constexpr unsigned int nibble { 0xF };
-    info_.architecture_major = (raw_gpu_id >> arch_major_offset) & nibble;
-    info_.architecture_minor = (raw_gpu_id >> arch_minor_offset) & nibble;
+    constexpr unsigned int bits4 { 0xF };
+    info_.architecture_major = (raw_gpu_id >> arch_major_offset) & bits4;
+    info_.architecture_minor = (raw_gpu_id >> arch_minor_offset) & bits4;
 
     info_.gpu_id = props.props.core_props.product_id;
     info_.num_l2_bytes = 1UL << props.props.l2_props.log2_cache_size;
