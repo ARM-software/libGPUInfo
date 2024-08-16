@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    auto instance = libgpuinfo::instance::create();
+    auto instance = libarmgpuinfo::instance::create();
     if (!instance)
     {
         std::cout << "ERROR: Failed to create instance\n";

@@ -62,7 +62,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-namespace libgpuinfo {
+namespace libarmgpuinfo {
 
 /** Mali GPU information. */
 struct gpuinfo
