@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 ARM Limited.
+ * Copyright (c) 2021-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,7 +64,7 @@
 
 namespace libarmgpuinfo {
 
-/** Mali GPU information. */
+/** Arm GPU information. */
 struct gpuinfo
 {
     /** GPU name */
@@ -75,6 +75,12 @@ struct gpuinfo
 
     /** GPU ID */
     uint32_t gpu_id;
+
+    /** GPU architecture major version */
+    uint32_t architecture_major;
+
+    /** GPU architecture minor version */
+    uint32_t architecture_minor;
 
     /** Number of shader cores */
     uint32_t num_shader_cores;

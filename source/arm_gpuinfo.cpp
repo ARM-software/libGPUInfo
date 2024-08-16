@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2023 ARM Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -119,6 +119,8 @@ int main(int argc, char *argv[])
     std::cout << "GPU configuration:\n";
     std::cout << "  Name: " << info.gpu_name << "\n";
     std::cout << "  Architecture: " << info.architecture_name << "\n";
+    std::cout << "  Architecture version: " << info.architecture_major
+              << "." << info.architecture_minor <<"\n";
     std::cout << "  Model number: 0x" << std::hex << info.gpu_id << std::dec << "\n";
     std::cout << "  Core count: " << info.num_shader_cores << "\n";
     std::cout << "  Core mask: 0x" << std::hex << info.shader_core_mask << std::dec << "\n";
