@@ -7,7 +7,8 @@ This page summarizes the major functional changes in each release.
 
 **Released:** November 2024
 
-The first release of libGPUInfo.
+This is small feature releases, adding support for reporting GPU architecture
+version numbers as an alternative to parsing product names.
 
 * **General:**
   * **Feature:** C++ namespace changed to `libarmgpuinfo`.
@@ -18,7 +19,8 @@ The first release of libGPUInfo.
 
 **Released:** June 2024
 
-The first release of libGPUInfo.
+This is small feature releases, adding support for new Arm GPUs and a few new
+GPU configuration values.
 
 * **General:**
   * **Feature:** Supports Immortalis-G925 series hardware.
