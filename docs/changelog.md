@@ -19,7 +19,7 @@ version numbers as an alternative to parsing product names.
 
 **Released:** June 2024
 
-This is small feature releases, adding support for new Arm GPUs and a few new
+This is small feature release, adding support for new Arm GPUs and some new
 GPU configuration values.
 
 * **General:**
