@@ -24,6 +24,10 @@ issue tracker.
 
 This library only supports devices using the Arm commercial driver.
 
+## Recent changes
+
+* Change log: [1.x series](./docs/changelog.md)
+
 ## Related API extensions
 
 This library is intended to support any Arm device, but some developers prefer
@@ -164,7 +168,7 @@ or general mobile graphics development or technology please submit them on the
 
 - - -
 
-_Copyright © 2023-2024, Arm Limited and contributors. All rights reserved._
+_Copyright © 2023-2024, Arm Limited and contributors._
 
 [1]: https://community.arm.com/support-forums/f/graphics-gaming-and-vr-forum/
 [2]: https://developer.arm.com/documentation/102849/latest/
