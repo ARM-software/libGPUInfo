@@ -36,7 +36,7 @@ GPU configuration values.
 The first release of libGPUInfo.
 
 * **General:**
-  * **Feature:** IP support for Mali-T720 (Midgard architecture) through to
+  * **Feature:** Support IP from Mali-T720 (Midgard architecture) through to
     Immortalis-G720 (5th Generation architecture).
   * **Feature:** Supports querying GPU model number and name.
   * **Feature:** Supports querying GPU shader core and cache configuration.
