@@ -10,7 +10,7 @@ This page summarizes the major functional changes in each release.
 The first release of libGPUInfo.
 
 * **General:**
-  * **Feature:** C++ namespace changed to  libarmgpuinfo
+  * **Feature:** C++ namespace changed to `libarmgpuinfo`.
   * **Feature:** Supports reporting architecture major/minor versions.
 
 <!-- ---------------------------------------------------------------------- -->
