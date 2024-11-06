@@ -7,7 +7,7 @@ This page summarizes the major functional changes in each release.
 
 **Released:** November 2024
 
-This is small feature releases, adding support for reporting GPU architecture
+This is a small feature release, adding support for reporting GPU architecture
 version numbers as an alternative to parsing product names.
 
 * **General:**
@@ -19,7 +19,7 @@ version numbers as an alternative to parsing product names.
 
 **Released:** June 2024
 
-This is small feature release, adding support for new Arm GPUs and some new
+This is a small feature release, adding support for new Arm GPUs and some new
 GPU configuration values.
 
 * **General:**
