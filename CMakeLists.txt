@@ -11,6 +11,6 @@ cmake_minimum_required(VERSION 3.15)
 
 set(CMAKE_CXX_STANDARD 14)
 
-project(libGPUInfo VERSION 1.1.0)
+project(libGPUInfo VERSION 1.2.0)
 
 add_subdirectory(source)
