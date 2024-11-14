@@ -31,4 +31,13 @@ target_include_directories(
     arm_gpuinfo PUBLIC
         ".")
 
+target_compile_options(
+    arm_gpuinfo PRIVATE
+
+    -Wall
+    -Wextra
+    -Wpedantic
+    -Werror
+    -Wshadow)
+
 install(TARGETS arm_gpuinfo DESTINATION ${PACKAGE_ROOT})
