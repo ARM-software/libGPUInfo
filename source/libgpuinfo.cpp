@@ -39,6 +39,8 @@
 
 #include "libgpuinfo.hpp"
 
+#define UNUSED(x) (void)x
+
 namespace libarmgpuinfo {
 
 struct product_entry {
@@ -62,6 +64,10 @@ static uint32_t get_num(
     uint32_t core_features,
     uint32_t thread_features
 ) {
+    UNUSED(core_count);
+    UNUSED(core_features);
+    UNUSED(thread_features);
+
     return val;
 }
 
@@ -70,6 +76,8 @@ static uint32_t get_num_eng_g31(
     uint32_t core_features,
     uint32_t thread_features
 ) {
+    UNUSED(core_features);
+
     if ((core_count == 1) && ((thread_features & 0xFFFF) == 0x2000))
     {
         return 1;
@@ -83,6 +91,8 @@ static uint32_t get_num_eng_g51(
     uint32_t core_features,
     uint32_t thread_features
 ) {
+    UNUSED(core_features);
+
     if ((core_count == 1) && ((thread_features & 0xFFFF) == 0x2000))
     {
         return 1;
@@ -96,6 +106,9 @@ static uint32_t get_num_eng_g52(
     uint32_t core_features,
     uint32_t thread_features
 ) {
+    UNUSED(core_count);
+    UNUSED(thread_features);
+
     return core_features & 0xF;
 }
 
@@ -104,6 +117,9 @@ static uint32_t get_num_fma_g510(
     uint32_t core_features,
     uint32_t thread_features
 ) {
+    UNUSED(core_count);
+    UNUSED(thread_features);
+
     uint32_t variant = core_features & 0xF;
     switch(variant)
     {
@@ -126,6 +142,9 @@ static uint32_t get_num_tex_g510(
     uint32_t core_features,
     uint32_t thread_features
 ) {
+    UNUSED(core_count);
+    UNUSED(thread_features);
+
     uint32_t variant = core_features & 0xF;
     switch(variant)
     {
@@ -148,6 +167,9 @@ static uint32_t get_num_pix_g510(
     uint32_t core_features,
     uint32_t thread_features
 ) {
+    UNUSED(core_count);
+    UNUSED(thread_features);
+
     // This returns min(blend, pixel)
     // Also limits to 2 for single engine configs
     uint32_t variant = core_features & 0xF;
@@ -171,6 +193,9 @@ static uint32_t get_num_eng_g510(
     uint32_t core_features,
     uint32_t thread_features
 ) {
+    UNUSED(core_count);
+    UNUSED(thread_features);
+
     uint32_t variant = core_features & 0xF;
     switch(variant)
     {
@@ -242,7 +267,7 @@ uint32_t get_gpu_id(
 
 const char* get_gpu_name(
     uint32_t gpu_id,
-    int core_count
+    uint32_t core_count
 ) {
     for (const auto& entry : PRODUCT_VERSIONS)
     {
@@ -271,7 +296,7 @@ const char* get_architecture_name(
 
 int get_num_exec_engines(
     uint32_t gpu_id,
-    int core_count,
+    uint32_t core_count,
     uint32_t core_features,
     uint32_t thread_features
 ) {
@@ -286,9 +311,9 @@ int get_num_exec_engines(
     return 0;
 }
 
-const uint32_t get_num_fp32_fmas(
+uint32_t get_num_fp32_fmas(
     uint32_t gpu_id,
-    int core_count,
+    uint32_t core_count,
     uint32_t core_features,
     uint32_t thread_features
 ) {
@@ -304,9 +329,9 @@ const uint32_t get_num_fp32_fmas(
     return 0;
 }
 
-const uint32_t get_num_texels(
+uint32_t get_num_texels(
     uint32_t gpu_id,
-    int core_count,
+    uint32_t core_count,
     uint32_t core_features,
     uint32_t thread_features
 ) {
@@ -321,9 +346,9 @@ const uint32_t get_num_texels(
     return 0;
 }
 
-const uint32_t get_num_pixels(
+uint32_t get_num_pixels(
     uint32_t gpu_id,
-    int core_count,
+    uint32_t core_count,
     uint32_t core_features,
     uint32_t thread_features
 ) {
@@ -1136,8 +1161,6 @@ bool instance::init_props() {
 
 /* See header for documentation */
 bool instance::init_props_pre_r21() {
-    int error = 0;
-
     kbase_pre_r21::uk_gpuprops_t props {};
     props.header.id = kbase_pre_r21::header_id::get_props;
     errno = 0;
