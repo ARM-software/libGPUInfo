@@ -212,7 +212,7 @@ static uint32_t get_num_eng_g510(
     }
 }
 
-const std::array<product_entry, 35> PRODUCT_VERSIONS {{
+static const std::array<product_entry, 35> PRODUCT_VERSIONS {{
     //                  ID,  ID Mask, Min cores,              Name,           Arch,      FMA/Eng,           Texels,           Pixels,          Engines
     product_entry { 0x6956, MASK_OLD,         1,       "Mali-T600",      "Midgard",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<2> },
     product_entry { 0x0620, MASK_OLD,         1,       "Mali-T620",      "Midgard",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<2> },
@@ -251,7 +251,7 @@ const std::array<product_entry, 35> PRODUCT_VERSIONS {{
     product_entry { 0xd001, MASK_NEW,         1,       "Mali-G625", "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
 }};
 
-uint32_t get_gpu_id(
+static uint32_t get_gpu_id(
     uint32_t gpu_id
 ) {
     for (const auto& entry : PRODUCT_VERSIONS)
@@ -265,7 +265,7 @@ uint32_t get_gpu_id(
     return gpu_id;
 }
 
-const char* get_gpu_name(
+static const char* get_gpu_name(
     uint32_t gpu_id,
     uint32_t core_count
 ) {
@@ -280,7 +280,7 @@ const char* get_gpu_name(
     return "Unknown";
 }
 
-const char* get_architecture_name(
+static const char* get_architecture_name(
     uint32_t gpu_id
 ) {
     for (const auto& entry : PRODUCT_VERSIONS)
@@ -294,7 +294,7 @@ const char* get_architecture_name(
     return "Unknown";
 }
 
-int get_num_exec_engines(
+static int get_num_exec_engines(
     uint32_t gpu_id,
     uint32_t core_count,
     uint32_t core_features,
@@ -311,7 +311,7 @@ int get_num_exec_engines(
     return 0;
 }
 
-uint32_t get_num_fp32_fmas(
+static uint32_t get_num_fp32_fmas(
     uint32_t gpu_id,
     uint32_t core_count,
     uint32_t core_features,
@@ -329,7 +329,7 @@ uint32_t get_num_fp32_fmas(
     return 0;
 }
 
-uint32_t get_num_texels(
+static uint32_t get_num_texels(
     uint32_t gpu_id,
     uint32_t core_count,
     uint32_t core_features,
@@ -346,7 +346,7 @@ uint32_t get_num_texels(
     return 0;
 }
 
-uint32_t get_num_pixels(
+static uint32_t get_num_pixels(
     uint32_t gpu_id,
     uint32_t core_count,
     uint32_t core_features,
