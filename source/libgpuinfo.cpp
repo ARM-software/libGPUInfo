@@ -852,6 +852,8 @@ class prop_decoder {
     bool decode(gpuinfo& info) {
         bool success = true;
 
+        // Zero init things we can read out-of-order
+        info.gpu_id = 0;
         uint64_t raw_gpu_id {};
         uint64_t raw_core_features {};
         uint64_t raw_thread_features {};
@@ -895,6 +897,15 @@ class prop_decoder {
             case prop_id_t::coherency_group_0:
                 info.num_shader_cores = __builtin_popcount(value);
                 info.shader_core_mask = value;
+                break;
+            case prop_id_t::coherency_group_1:
+                // Workaround for Kirin 9000 which reports using CG1 not CG0
+                // Limit workaround to matching Kirin 9000 config
+                if ((info.gpu_id == 0x9002) && (value == 0x77777777))
+                {
+                    info.num_shader_cores = __builtin_popcount(value);
+                    info.shader_core_mask = value;
+                }
                 break;
             default:
                 break;
