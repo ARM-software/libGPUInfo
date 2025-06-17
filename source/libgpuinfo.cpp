@@ -853,7 +853,7 @@ class prop_decoder {
         bool success = true;
 
         // Zero init things we can read out-of-order
-        info.gpu_id = 0;
+        info.shader_core_mask = 0;
         uint64_t raw_gpu_id {};
         uint64_t raw_core_features {};
         uint64_t raw_thread_features {};
@@ -895,22 +895,18 @@ class prop_decoder {
                 assert(value == 1);
                 break;
             case prop_id_t::coherency_group_0:
-                info.num_shader_cores = __builtin_popcount(value);
-                info.shader_core_mask = value;
-                break;
             case prop_id_t::coherency_group_1:
-                // Workaround for Kirin 9000 which reports using CG1 not CG0
-                // Limit workaround to matching Kirin 9000 config
-                if ((info.gpu_id == 0x9002) && (value == 0x77777777))
-                {
-                    info.num_shader_cores = __builtin_popcount(value);
-                    info.shader_core_mask = value;
-                }
+            case prop_id_t::coherency_group_2:
+            case prop_id_t::coherency_group_3:
+                info.shader_core_mask |= value;
                 break;
             default:
                 break;
             }
         }
+
+        // Accumulate this after all shader core bitmasks are merged
+        info.num_shader_cores = __builtin_popcount(info.shader_core_mask);
 
         // Decode architecture versions
         constexpr uint64_t bits4 { 0xF };
