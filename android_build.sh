@@ -52,6 +52,7 @@ cmake \
     -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
     -DCMAKE_TOOLCHAIN_FILE="${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake" \
     -DCMAKE_INSTALL_PREFIX=../ \
+    -DCMAKE_WARN_DEPRECATED=OFF \
     ..
 
 make install -j8
