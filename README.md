@@ -56,6 +56,7 @@ The query mechanism can report the following information about the GPU:
 
 * **Name:** The product name string, e.g. "Mali-G710".
 * **Architecture:** The product architecture name string, e.g. "Valhall".
+* **Architecture version:** The product architecture version, e.g. 9.2.
 * **Model number:** The product ID number, e.g. 0xa002.
 * **Shader core count:** The number of shader cores in the design.
 * **Shader core mask:** The shader core topology mask.
@@ -168,7 +169,7 @@ or general mobile graphics development or technology please submit them on the
 
 - - -
 
-_Copyright © 2023-2024, Arm Limited and contributors._
+_Copyright © 2023-2025, Arm Limited and contributors._
 
 [1]: https://community.arm.com/support-forums/f/graphics-gaming-and-vr-forum/
 [2]: https://developer.arm.com/documentation/102849/latest/
