@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Arm Limited.
+ * Copyright (c) 2021-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1054,7 +1054,7 @@ std::unique_ptr<instance> instance::create(
 const gpuinfo& instance::get_info() const
 {
     return info_;
-};
+}
 
 /* See header for documentation */
 instance::~instance()
