@@ -33,7 +33,7 @@
  * The library is simple to use:
  *
  *     // Create a connection with the kernel driver ...
- *     std::unique_ptr<instance> conn = libgpuinfo::instance::create();
+ *     std::unique_ptr<instance> conn = libarmgpuinfo::instance::create();
  *     if (!conn)
  *     {
  *         std::cout << "ERROR: Failed to create Mali instance\n";
