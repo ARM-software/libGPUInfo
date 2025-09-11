@@ -212,7 +212,7 @@ static uint32_t get_num_eng_g510(
     }
 }
 
-static const std::array<product_entry, 35> PRODUCT_VERSIONS {{
+const std::array<product_entry, 38> PRODUCT_VERSIONS {{
     //                  ID,  ID Mask, Min cores,              Name,           Arch,      FMA/Eng,           Texels,           Pixels,          Engines
     product_entry { 0x6956, MASK_OLD,         1,       "Mali-T600",      "Midgard",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<2> },
     product_entry { 0x0620, MASK_OLD,         1,       "Mali-T620",      "Midgard",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<2> },
@@ -242,13 +242,16 @@ static const std::array<product_entry, 35> PRODUCT_VERSIONS {{
     product_entry { 0xb002, MASK_NEW,         7,       "Mali-G715",      "Valhall",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
     product_entry { 0xb002, MASK_NEW,         1,       "Mali-G615",      "Valhall",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
     product_entry { 0xb003, MASK_NEW,         1,       "Mali-G615",      "Valhall",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry { 0xc000, MASK_NEW,        10, "Immortalis-G720", "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry { 0xc000, MASK_NEW,         6,       "Mali-G720", "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry { 0xc000, MASK_NEW,         1,       "Mali-G620", "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry { 0xc001, MASK_NEW,         1,       "Mali-G620", "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry { 0xd000, MASK_NEW,        10, "Immortalis-G925", "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry { 0xd000, MASK_NEW,         6,       "Mali-G725", "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry { 0xd001, MASK_NEW,         1,       "Mali-G625", "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry { 0xc000, MASK_NEW,        10, "Immortalis-G720",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry { 0xc000, MASK_NEW,         6,       "Mali-G720",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry { 0xc000, MASK_NEW,         1,       "Mali-G620",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry { 0xc001, MASK_NEW,         1,       "Mali-G620",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry { 0xd000, MASK_NEW,        10, "Immortalis-G925",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry { 0xd000, MASK_NEW,         6,       "Mali-G725",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry { 0xd001, MASK_NEW,         1,       "Mali-G625",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry { 0xe000, MASK_NEW,        10,   "Mali G1-Ultra",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry { 0xe001, MASK_NEW,         6, "Mali G1-Premium",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry { 0xe003, MASK_NEW,         1,     "Mali G1-Pro",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
 }};
 
 static uint32_t get_gpu_id(
