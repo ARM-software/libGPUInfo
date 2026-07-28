@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2023-2024 Arm Limited.
+# Copyright (c) 2023-2026 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -33,11 +33,17 @@ target_include_directories(
 
 target_compile_options(
     arm_gpuinfo PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+        -Werror
+        -Wshadow)
 
-    -Wall
-    -Wextra
-    -Wpedantic
-    -Werror
-    -Wshadow)
+# Force 16KB section alignment for compatibility with modern Android devices
+# See https://developer.android.com/guide/practices/page-sizes
+target_link_options(
+    arm_gpuinfo PRIVATE
+        $<$<PLATFORM_ID:Android>:-Wl,-z,max-page-size=16384>
+        $<$<PLATFORM_ID:Android>:-Wl,-z,common-page-size=16384>)
 
 install(TARGETS arm_gpuinfo DESTINATION ${PACKAGE_ROOT})
