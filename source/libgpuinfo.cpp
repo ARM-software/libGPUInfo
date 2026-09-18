@@ -27,7 +27,6 @@
 #include <cerrno>
 #include <cstdint>
 #include <functional>
-#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -909,7 +908,7 @@ class prop_decoder {
         }
 
         // Accumulate this after all shader core bitmasks are merged
-        info.num_shader_cores = __builtin_popcount(info.shader_core_mask);
+        info.num_shader_cores = __builtin_popcountll(info.shader_core_mask);
 
         // Decode architecture versions
         constexpr uint64_t bits4 { 0xF };
@@ -1031,8 +1030,118 @@ class prop_decoder {
     std::size_t size_;
 };
 
+namespace panthor {
+
+/** Query type */
+enum class dev_query_type : uint32_t {
+    /** Query GPU information. */
+    gpu_info = 0,
+};
+
+
+
+/** Query device properties. */
+struct dev_query {
+    /** The query type. */
+    dev_query_type type;
+    /**
+     * Size of the type being queried. If `pointer` is `NULL`, `size` is
+     * updated by the driver to provide the output structure size. If it is
+     * not `NULL`, the driver will only copy the smaller of `size` or the
+     * actual structure size.
+     */
+    uint32_t size;
+    /** User pointer to a query type struct. */
+    uint64_t pointer;
+};
+
+/** Interface panthor number. */
+constexpr auto iface_number = 0x64;
+
+/** Commands describing panthor ioctl interface. */
+enum command {
+    /** Query device properties. */
+    cmd_dev_query = _IOWR(iface_number, 0x40, ::libarmgpuinfo::panthor::dev_query),
+};
+
+/** GPU information. */
+struct gpu_info {
+    /** GPU ID. */
+    uint32_t gpu_id;
+    /** GPU revision. */
+    uint32_t gpu_rev;
+    /** CSF ID. */
+    uint32_t csf_id;
+    /** L2$ features. */
+    uint32_t l2_features;
+    /** Tiler features. */
+    uint32_t tiler_features;
+    /** Memory features. */
+    uint32_t mem_features;
+    /** MMU features. */
+    uint32_t mmu_features;
+    /** Thread features. */
+    uint32_t thread_features;
+    /** Maximum number of threads. */
+    uint32_t max_threads;
+    /** Maximum workgroup size. */
+    uint32_t thread_max_workgroup_size;
+    /** Maximum number of threads that can wait simultaneously on a barrier. */
+    uint32_t thread_max_barrier_size;
+    /** Coherency features. */
+    uint32_t coherency_features;
+    /** Texture features. */
+    uint32_t texture_features[4];
+    /** Bitmask encoding the number of address spaces exposed by the MMU. */
+    uint32_t as_present;
+    /** Padding MBZ. */
+    uint32_t pad0;
+    /** Bitmask encoding the shader cores exposed by the GPU. */
+    uint64_t shader_present;
+    /** Bitmask encoding the L2 caches exposed by the GPU. */
+    uint64_t l2_present;
+    /** Bitmask encoding the tiler units exposed by the GPU. */
+    uint64_t tiler_present;
+    /** Used to determine core variants when they exist. */
+    uint32_t core_features;
+    /** Padding MBZ. */
+    uint32_t pad;
+    /** Bitmask describing GPU-wide features */
+    uint64_t gpu_features;
+    /** Padding MBZ. */
+    uint32_t pad1[19];
+    /** Upper 32 bits of GPU_ID. */
+    uint32_t gpu_id_hi;
+    /** Upper 32 bits of REVIDR. */
+    uint32_t gpu_rev_hi;
+    /** Upper 32 bits of L2 features. */
+    uint32_t l2_features_hi;
+    /** Neural accelerator present bitmap. */
+    uint64_t neural_present;
+    /** Shader core base present bitmap. */
+    uint64_t base_present;
+    /** Granularity of number of active threads. */
+    uint32_t thread_num_active_granularity;
+    /** Value of set coherency mode. */
+    uint32_t coherency_enable;
+};
+}
+
 /* See header for documentation */
 std::unique_ptr<instance> instance::create(
+    const uint32_t id
+) {
+    auto result = create_kbase(id);
+
+    if (result == nullptr) {
+        result = create_panthor(id);
+    }
+
+    return result;
+}
+
+/* See create function for documentation */
+std::unique_ptr<instance> instance::create_kbase(
     const uint32_t id
 ) {
     std::string device_path("/dev/mali" + std::to_string(id));
@@ -1052,7 +1161,43 @@ std::unique_ptr<instance> instance::create(
     }
 
     // Create the instance
-    auto result = std::unique_ptr<instance>(new instance(fd));
+    auto result = std::unique_ptr<instance>(new instance(fd, false));
+    if (!result || !result->valid_) {
+        return nullptr;
+    }
+
+    return result;
+}
+
+/* See create function for documentation */
+std::unique_ptr<instance> instance::create_panthor(
+    const uint32_t id
+) {
+    /*
+    * DRM drivers that support the DRIVER_RENDER feature get allocated two driver nodes under
+    * `/dev/dri/`: one control node with an ID of 0-64, and a render node with an ID of 124-188.
+    * HWCPipe2 uses the render node to call IOCTLs.
+    */
+    constexpr uint32_t dri_render_node_start = 128;
+
+    std::string device_path("/dev/dri/renderD" + std::to_string(dri_render_node_start + id));
+
+    // Open the kernel driver device node
+    const int fd = ::open(device_path.c_str(), O_RDONLY);
+    if (fd < 0) {
+        return nullptr;
+    }
+
+    // Check that it is a character device
+    struct stat s {};
+    const int fs_result = fstat(fd, &s);
+    if ((fs_result < 0) || (S_ISCHR(s.st_mode) == 0)) {
+        ::close(fd);
+        return nullptr;
+    }
+
+    // Create the instance
+    auto result = std::unique_ptr<instance>(new instance(fd, true));
     if (!result || !result->valid_) {
         return nullptr;
     }
@@ -1073,23 +1218,22 @@ instance::~instance()
 }
 
 /* See header for documentation */
-instance::instance(int fd):
+instance::instance(int fd, bool panthor):
     fd_(fd)
 {
-    if (!check_version()) {
-        valid_ = false;
+    if (!check_version(panthor)) {
         return;
     }
 
     if (!set_flags()) {
-        valid_ = false;
         return;
     }
 
     if (!init_props()) {
-        valid_ = false;
         return;
     }
+
+    valid_ = true;
 }
 
 static bool is_supported(unsigned int major, unsigned int minor)
@@ -1098,31 +1242,121 @@ static bool is_supported(unsigned int major, unsigned int minor)
 }
 
 /* See header for documentation */
-bool instance::check_version() {
-    // Probe pre-r21 JM kernel
-    // Must be first in the list because CSF reuses an old IOCTL ID
-    iface_ = iface_type::pre_r21;
-    kbase_pre_r21::version_check_t pre_r21 {};
-    pre_r21.header.id = kbase_pre_r21::header_id::version_check;
-    ::ioctl(fd_, kbase_pre_r21::version_check, &pre_r21);
-    // If this is non-zero this must be pre-r21 driver, so check version
-    if (pre_r21.is_set()) {
-        return is_supported(pre_r21.major, pre_r21.minor);
-    }
+bool instance::check_version(bool panthor) {
+    // Clear errno
+    errno = 0;
 
-    // Probe r21+ JM kernel
-    iface_ = iface_type::post_r21;
-    kbase_post_r21::version_check_t post_r21 {};
-    ::ioctl(fd_, kbase_post_r21::version_check_jm, &post_r21);
-    // If this is non-zero this must be post-r21 JM driver, so check version
-    if (post_r21.is_set()) {
-        return is_supported(post_r21.major, post_r21.minor);
-    }
 
-    // Probe r21+ CSF kernel
-    ::ioctl(fd_, kbase_post_r21::version_check_csf, &post_r21);
-    // If this is any non-zero value this is a valid CSF GPU
-    return post_r21.is_set();
+    if (panthor) {
+        panthor::dev_query query {};
+
+        query.type = panthor::dev_query_type::gpu_info;
+        ::ioctl(fd_, panthor::cmd_dev_query, &query);
+        if (errno != 0) {
+            return false;
+        }
+
+        panthor::gpu_info gpu_info {};
+        query.size = std::min(static_cast<uint32_t>(sizeof(gpu_info)), query.size);
+        query.pointer = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(&gpu_info));
+        ::ioctl(fd_, panthor::cmd_dev_query, &query);
+        if (errno != 0) {
+            return false;
+        }
+
+        // populate
+        const uint64_t raw_gpu_id = ((uint64_t)gpu_info.gpu_id_hi << 32) | gpu_info.gpu_id;
+
+        // Decode architecture versions
+        constexpr uint64_t bits4 { 0xF };
+        constexpr uint64_t bits8 { 0xFF };
+
+        constexpr uint64_t compat_shift { 28 };
+        constexpr uint64_t compat { 0xF };
+
+        const bool is_64bit_id = ((raw_gpu_id >> compat_shift) & bits4) == compat;
+
+        // Old-style 32-bit ID
+        if (!is_64bit_id)
+        {
+            constexpr uint64_t arch_major_offset { 28 };
+            constexpr uint64_t arch_minor_offset { 24 };
+            info_.architecture_major = (raw_gpu_id >> arch_major_offset) & bits4;
+            info_.architecture_minor = (raw_gpu_id >> arch_minor_offset) & bits4;
+            info_.gpu_id = get_gpu_id(static_cast<uint32_t>(raw_gpu_id));
+        }
+        // New-style 64-bit ID
+        else
+        {
+            constexpr uint64_t arch_major_offset { 56 };
+            constexpr uint64_t arch_minor_offset { 48 };
+            info_.architecture_major = (raw_gpu_id >> arch_major_offset) & bits8;
+            info_.architecture_minor = (raw_gpu_id >> arch_minor_offset) & bits8;
+            info_.gpu_id = get_gpu_id(static_cast<uint32_t>(raw_gpu_id >> 32U));
+        }
+
+
+        info_.num_l2_bytes = 1UL << ((gpu_info.l2_features >> 16U) & 0xFFU);
+        info_.num_l2_slices = 1UL + ((gpu_info.mem_features >> 8U) & 0xFU);
+        info_.num_bus_bits = 1UL << ((gpu_info.l2_features >> 24U) & 0xFFU);
+
+        info_.shader_core_mask = gpu_info.shader_present;
+        info_.num_shader_cores = static_cast<uint64_t>(__builtin_popcountll(info_.shader_core_mask));
+
+        info_.num_exec_engines = get_num_exec_engines(
+            info_.gpu_id,
+            info_.num_shader_cores,
+            gpu_info.core_features,
+            gpu_info.thread_features);
+
+        info_.num_fp32_fmas_per_cy = get_num_fp32_fmas(
+            info_.gpu_id,
+            info_.num_shader_cores,
+            gpu_info.core_features,
+            gpu_info.thread_features);
+
+        info_.num_fp16_fmas_per_cy = info_.num_fp32_fmas_per_cy * 2;
+
+        info_.num_texels_per_cy = get_num_texels(
+            info_.gpu_id,
+            info_.num_shader_cores,
+            gpu_info.core_features,
+            gpu_info.thread_features);
+
+        info_.num_pixels_per_cy = get_num_pixels(
+            info_.gpu_id,
+            info_.num_shader_cores,
+            gpu_info.core_features,
+            gpu_info.thread_features);
+
+        return true;
+    }
+    else {
+        // Probe pre-r21 JM kernel
+        // Must be first in the list because CSF reuses an old IOCTL ID
+        iface_ = iface_type::kbase_pre_r21;
+        kbase_pre_r21::version_check_t pre_r21 {};
+        pre_r21.header.id = kbase_pre_r21::header_id::version_check;
+        ::ioctl(fd_, kbase_pre_r21::version_check, &pre_r21);
+        // If this is non-zero this must be pre-r21 driver, so check version
+        if (pre_r21.is_set()) {
+            return is_supported(pre_r21.major, pre_r21.minor);
+        }
+
+        // Probe r21+ JM kernel
+        iface_ = iface_type::kbase_post_r21;
+        kbase_post_r21::version_check_t post_r21 {};
+        ::ioctl(fd_, kbase_post_r21::version_check_jm, &post_r21);
+        // If this is non-zero this must be post-r21 JM driver, so check version
+        if (post_r21.is_set()) {
+            return is_supported(post_r21.major, post_r21.minor);
+        }
+
+        // Probe r21+ CSF kernel
+        ::ioctl(fd_, kbase_post_r21::version_check_csf, &post_r21);
+        // If this is any non-zero value this is a valid CSF GPU
+        return post_r21.is_set();
+    }
 }
 
 /** Call set flags ioctl. */
@@ -1133,14 +1367,26 @@ bool instance::set_flags() {
     // Clear errno
     errno = 0;
 
-    if (iface_ == iface_type::pre_r21) {
-        kbase_pre_r21::set_flags_t flags {};
-        flags.header.id = kbase_pre_r21::header_id::set_flags;
-        flags.create_flags = system_monitor_flag;
-        ::ioctl(fd_, kbase_pre_r21::set_flags, &flags);
-    } else {
-        kbase_post_r21::set_flags_t flags { system_monitor_flag };
-        ::ioctl(fd_, kbase_post_r21::set_flags, &flags);
+    switch (iface_) {
+        case iface_type::kbase_pre_r21: {
+            kbase_pre_r21::set_flags_t flags {};
+            flags.header.id = kbase_pre_r21::header_id::set_flags;
+            flags.create_flags = system_monitor_flag;
+            ::ioctl(fd_, kbase_pre_r21::set_flags, &flags);
+            break;
+        }
+        case iface_type::kbase_post_r21: {
+            kbase_post_r21::set_flags_t flags { system_monitor_flag };
+            ::ioctl(fd_, kbase_post_r21::set_flags, &flags);
+            break;
+        }
+        case iface_type::panthor: {
+            // nothing to do
+            return true;
+        }
+        default: {
+            return false;
+        }
     }
 
     // Mali driver will fail if reinitialized, but it's benign
@@ -1150,11 +1396,25 @@ bool instance::set_flags() {
 
 /* See header for documentation */
 bool instance::init_props() {
-    bool success;
-    if (iface_ == iface_type::pre_r21) {
-        success = init_props_pre_r21();
-    } else {
-        success = init_props_post_r21();
+    bool success = false;
+
+    switch (iface_) {
+        case iface_type::kbase_pre_r21: {
+            success = init_props_pre_r21();
+            break;
+        }
+        case iface_type::kbase_post_r21: {
+            success = init_props_post_r21();
+            break;
+        }
+        case iface_type::panthor: {
+            // info was part initialized in check_version
+            success = valid_;
+            break;
+        }
+        default: {
+            return false;
+        }
     }
 
     // Perform some common cleanup on the data
