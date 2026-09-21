@@ -117,9 +117,11 @@ struct gpuinfo
 /** Kbase ioctl interface type. */
 enum class iface_type {
     /** Pre R21 kernel */
-    pre_r21,
+    kbase_pre_r21,
     /** Post R21 kernel (inclusive) */
-    post_r21
+    kbase_post_r21,
+    /** Panthor */
+    panthor,
 };
 
 /**
@@ -135,7 +137,7 @@ public:
      *
      * @return The created instance, or @c nullptr on failure.
      */
-    static std::unique_ptr<instance> create(const uint32_t id=0);
+    static std::unique_ptr<instance> create(uint32_t id=0);
 
     /**
      * Get the GPU device property information.
@@ -154,16 +156,20 @@ public:
     ~instance();
 
 private:
+
+    static std::unique_ptr<instance> create_kbase(uint32_t id);
+    static std::unique_ptr<instance> create_panthor(uint32_t id);
+
     /**
      * Create a new instance.
      *
-     * @param fd   The opened driver file descriptor.
-     *
+     * @param fd      The opened driver file descriptor.
+     * @param panthor True for panthor driver, false for kbase driver.
      */
-    instance(int fd);
+    instance(int fd, bool panthor);
 
     /** Check the Mali kernel driver interface version. */
-    bool check_version();
+    bool check_version(bool panthor);
 
     /** Configure Mali kernel driver connection flags. */
     bool set_flags();
@@ -184,7 +190,7 @@ private:
     iface_type iface_ {};
 
     /** The validity state of the object if initialization fails. */
-    bool valid_ { true };
+    bool valid_ { false };
 
     /** The kernel driver file descriptor. */
     int fd_ {};
