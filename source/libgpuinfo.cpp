@@ -259,8 +259,8 @@ const std::array<product_entry, 42> PRODUCT_VERSIONS {{
     product_entry {     0xe001, PRD_MASK_1,         6, "Mali G1-Premium",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
     product_entry {     0xe003, PRD_MASK_1,         1,     "Mali G1-Pro",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
 
-    product_entry { 0x0f000000, PRD_MASK_2,         1,   "Mali G2-Ultra",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry { 0x0f000001, PRD_MASK_2,         1, "Mali G2-Premium",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry { 0x0f000000, PRD_MASK_2,        10,   "Mali G2-Ultra",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry { 0x0f000001, PRD_MASK_2,         6, "Mali G2-Premium",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
     product_entry { 0x0f000003, PRD_MASK_2,         1,     "Mali G2-Pro",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
     product_entry { 0x0f000005, PRD_MASK_2,         1,   "Mali G2-Ultra",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
 }};
