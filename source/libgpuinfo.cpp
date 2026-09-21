@@ -1038,8 +1038,6 @@ enum class dev_query_type : uint32_t {
     gpu_info = 0,
 };
 
-
-
 /** Query device properties. */
 struct dev_query {
     /** The query type. */
@@ -1246,7 +1244,6 @@ bool instance::check_version(bool panthor) {
     // Clear errno
     errno = 0;
 
-
     if (panthor) {
         panthor::dev_query query {};
 
@@ -1264,7 +1261,7 @@ bool instance::check_version(bool panthor) {
             return false;
         }
 
-        // populate
+        // Populate
         const uint64_t raw_gpu_id = ((uint64_t)gpu_info.gpu_id_hi << 32) | gpu_info.gpu_id;
 
         // Decode architecture versions
@@ -1276,18 +1273,15 @@ bool instance::check_version(bool panthor) {
 
         const bool is_64bit_id = ((raw_gpu_id >> compat_shift) & bits4) == compat;
 
-        // Old-style 32-bit ID
-        if (!is_64bit_id)
-        {
+        if (!is_64bit_id) {
+            // Old-style 32-bit ID
             constexpr uint64_t arch_major_offset { 28 };
             constexpr uint64_t arch_minor_offset { 24 };
             info_.architecture_major = (raw_gpu_id >> arch_major_offset) & bits4;
             info_.architecture_minor = (raw_gpu_id >> arch_minor_offset) & bits4;
             info_.gpu_id = get_gpu_id(static_cast<uint32_t>(raw_gpu_id));
-        }
-        // New-style 64-bit ID
-        else
-        {
+        } else {
+            // New-style 64-bit ID
             constexpr uint64_t arch_major_offset { 56 };
             constexpr uint64_t arch_minor_offset { 48 };
             info_.architecture_major = (raw_gpu_id >> arch_major_offset) & bits8;
@@ -1330,8 +1324,7 @@ bool instance::check_version(bool panthor) {
             gpu_info.thread_features);
 
         return true;
-    }
-    else {
+    } else {
         // Probe pre-r21 JM kernel
         // Must be first in the list because CSF reuses an old IOCTL ID
         iface_ = iface_type::kbase_pre_r21;
@@ -1381,7 +1374,7 @@ bool instance::set_flags() {
             break;
         }
         case iface_type::panthor: {
-            // nothing to do
+            // Nothing to do
             return true;
         }
         default: {
@@ -1408,7 +1401,7 @@ bool instance::init_props() {
             break;
         }
         case iface_type::panthor: {
-            // info was part initialized in check_version
+            // Info was part initialized in check_version
             success = valid_;
             break;
         }
