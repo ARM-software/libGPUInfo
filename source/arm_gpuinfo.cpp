@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2023-2024 Arm Limited.
+ * Copyright (c) 2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -118,6 +118,7 @@ int main(int argc, char *argv[])
 
     std::cout << "GPU configuration:\n";
     std::cout << "  Name: " << info.gpu_name << "\n";
+    std::cout << "  Variant: " << info.gpu_variant << "\n";
     std::cout << "  Architecture: " << info.architecture_name << "\n";
     std::cout << "  Architecture version: " << info.architecture_major
               << "." << info.architecture_minor <<"\n";

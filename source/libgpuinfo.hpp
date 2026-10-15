@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Arm Limited.
+ * Copyright (c) 2021-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,7 +67,7 @@ namespace libarmgpuinfo {
 /** Arm GPU information. */
 struct gpuinfo
 {
-    /** GPU name */
+    /** GPU product name */
     const char* gpu_name;
 
     /** GPU architecture name */
@@ -75,6 +75,9 @@ struct gpuinfo
 
     /** GPU ID */
     uint32_t gpu_id;
+
+    /** GPU product variant number */
+    uint32_t gpu_variant;
 
     /** GPU architecture major version */
     uint32_t architecture_major;
@@ -112,7 +115,6 @@ struct gpuinfo
     /** Maximum number of output pixels per clock per core */
     uint32_t num_pixels_per_cy;
 };
-
 
 /** Kbase ioctl interface type. */
 enum class iface_type {

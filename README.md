@@ -58,6 +58,7 @@ The query mechanism can report the following information about the GPU:
 * **Architecture:** The product architecture name string, e.g. "Valhall".
 * **Architecture version:** The product architecture version, e.g. 9.2.
 * **Model number:** The product ID number, e.g. 0xa002.
+* **Variant:** The product variant number for configurable products such as Mali-G310 and Mali-G510. Reports variant 0 for other products.
 * **Shader core count:** The number of shader cores in the design.
 * **Shader core mask:** The shader core topology mask.
 * **L2 cache count:** The number of L2 cache slices in the design.
@@ -169,7 +170,7 @@ or general mobile graphics development or technology please submit them on the
 
 - - -
 
-_Copyright © 2023-2025, Arm Limited and contributors._
+_Copyright © 2023-2026, Arm Limited and contributors._
 
 [1]: https://community.arm.com/support-forums/f/graphics-gaming-and-vr-forum/
 [2]: https://developer.arm.com/documentation/102849/latest/
