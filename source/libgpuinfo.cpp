@@ -44,7 +44,8 @@ namespace libarmgpuinfo {
 
 struct product_entry {
     uint32_t id;
-    uint32_t mask;
+    uint32_t id_mask;
+    uint32_t variant_mask;
     uint32_t min_cores;
     const char* name;
     const char* architecture;
@@ -117,6 +118,7 @@ static uint32_t get_num_eng_g52(
     return core_features & 0xF;
 }
 
+// Note: G310 and G510 share this decode function
 static uint32_t get_num_fma_g510(
     int core_count,
     uint32_t core_features,
@@ -142,6 +144,7 @@ static uint32_t get_num_fma_g510(
     }
 }
 
+// Note: G310 and G510 share this decode function
 static uint32_t get_num_tex_g510(
     int core_count,
     uint32_t core_features,
@@ -167,6 +170,7 @@ static uint32_t get_num_tex_g510(
     }
 }
 
+// Note: G310 and G510 share this decode function
 static uint32_t get_num_pix_g510(
     int core_count,
     uint32_t core_features,
@@ -193,6 +197,7 @@ static uint32_t get_num_pix_g510(
     }
 }
 
+// Note: G310 and G510 share this decode function
 static uint32_t get_num_eng_g510(
     int core_count,
     uint32_t core_features,
@@ -218,64 +223,79 @@ static uint32_t get_num_eng_g510(
 }
 
 const std::array<product_entry, 42> PRODUCT_VERSIONS {{
-    //                      ID,    ID Mask, Min cores,              Name,           Arch,      FMA/Eng,           Texels,           Pixels,          Engines
-    product_entry {     0x6956, PRD_MASK_0,         1,       "Mali-T600",      "Midgard",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<2> },
-    product_entry {     0x0620, PRD_MASK_0,         1,       "Mali-T620",      "Midgard",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<2> },
-    product_entry {     0x0720, PRD_MASK_0,         1,       "Mali-T720",      "Midgard",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<1> },
-    product_entry {     0x0750, PRD_MASK_0,         1,       "Mali-T760",      "Midgard",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<2> },
-    product_entry {     0x0820, PRD_MASK_0,         1,       "Mali-T820",      "Midgard",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<1> },
-    product_entry {     0x0830, PRD_MASK_0,         1,       "Mali-T830",      "Midgard",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<2> },
-    product_entry {     0x0860, PRD_MASK_0,         1,       "Mali-T860",      "Midgard",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<2> },
-    product_entry {     0x0880, PRD_MASK_0,         1,       "Mali-T880",      "Midgard",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<3> },
-    product_entry {     0x6000, PRD_MASK_1,         1,        "Mali-G71",      "Bifrost",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<3> },
-    product_entry {     0x6001, PRD_MASK_1,         1,        "Mali-G72",      "Bifrost",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<3> },
-    product_entry {     0x7000, PRD_MASK_1,         1,        "Mali-G51",      "Bifrost",       get_num<4>,       get_num<2>,       get_num<2>,  get_num_eng_g51 },
-    product_entry {     0x7001, PRD_MASK_1,         1,        "Mali-G76",      "Bifrost",       get_num<8>,       get_num<2>,       get_num<2>,       get_num<3> },
-    product_entry {     0x7002, PRD_MASK_1,         1,        "Mali-G52",      "Bifrost",       get_num<8>,       get_num<2>,       get_num<2>,  get_num_eng_g52 },
-    product_entry {     0x7003, PRD_MASK_1,         1,        "Mali-G31",      "Bifrost",       get_num<4>,       get_num<2>,       get_num<2>,  get_num_eng_g31 },
-    product_entry {     0x9000, PRD_MASK_1,         1,        "Mali-G77",      "Valhall",      get_num<16>,       get_num<4>,       get_num<2>,       get_num<2> },
-    product_entry {     0x9001, PRD_MASK_1,         1,        "Mali-G57",      "Valhall",      get_num<16>,       get_num<4>,       get_num<2>,       get_num<2> },
-    product_entry {     0x9003, PRD_MASK_1,         1,        "Mali-G57",      "Valhall",      get_num<16>,       get_num<4>,       get_num<2>,       get_num<2> },
-    product_entry {     0x9004, PRD_MASK_1,         1,        "Mali-G68",      "Valhall",      get_num<16>,       get_num<4>,       get_num<2>,       get_num<2> },
-    product_entry {     0x9002, PRD_MASK_1,         1,        "Mali-G78",      "Valhall",      get_num<16>,       get_num<4>,       get_num<2>,       get_num<2> },
-    product_entry {     0x9005, PRD_MASK_1,         1,      "Mali-G78AE",      "Valhall",      get_num<16>,       get_num<4>,       get_num<2>,       get_num<2> },
-    product_entry {     0xa002, PRD_MASK_1,         1,       "Mali-G710",      "Valhall",      get_num<32>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry {     0xa007, PRD_MASK_1,         1,       "Mali-G610",      "Valhall",      get_num<32>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry {     0xa003, PRD_MASK_1,         1,       "Mali-G510",      "Valhall", get_num_fma_g510, get_num_tex_g510, get_num_pix_g510, get_num_eng_g510 },
-    product_entry {     0xa004, PRD_MASK_1,         1,       "Mali-G310",      "Valhall", get_num_fma_g510, get_num_tex_g510, get_num_pix_g510, get_num_eng_g510 },
-    product_entry {     0xb002, PRD_MASK_1,        10, "Immortalis-G715",      "Valhall",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry {     0xb002, PRD_MASK_1,         7,       "Mali-G715",      "Valhall",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry {     0xb002, PRD_MASK_1,         1,       "Mali-G615",      "Valhall",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry {     0xb003, PRD_MASK_1,         1,       "Mali-G615",      "Valhall",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry {     0xc000, PRD_MASK_1,        10, "Immortalis-G720",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry {     0xc000, PRD_MASK_1,         6,       "Mali-G720",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry {     0xc000, PRD_MASK_1,         1,       "Mali-G620",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry {     0xc001, PRD_MASK_1,         1,       "Mali-G620",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry {     0xd000, PRD_MASK_1,        10, "Immortalis-G925",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry {     0xd000, PRD_MASK_1,         6,       "Mali-G725",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry {     0xd001, PRD_MASK_1,         1,       "Mali-G625",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry {     0xe000, PRD_MASK_1,        10,   "Mali G1-Ultra",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry {     0xe001, PRD_MASK_1,         6, "Mali G1-Premium",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry {     0xe003, PRD_MASK_1,         1,     "Mali G1-Pro",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-
-    product_entry { 0x0f000000, PRD_MASK_2,        10,   "Mali G2-Ultra",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry { 0x0f000001, PRD_MASK_2,         6, "Mali G2-Premium",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry { 0x0f000003, PRD_MASK_2,         1,     "Mali G2-Pro",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
-    product_entry { 0x0f000005, PRD_MASK_2,         1,   "Mali G2-Ultra",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    //                      ID,    ID Mask, Variant Mask, Min cores,              Name,           Arch,          FMA/Eng,           Texels,           Pixels,          Engines
+    product_entry {     0x6956, PRD_MASK_0,            0,         1,       "Mali-T600",      "Midgard",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<2> },
+    product_entry {     0x0620, PRD_MASK_0,            0,         1,       "Mali-T620",      "Midgard",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<2> },
+    product_entry {     0x0720, PRD_MASK_0,            0,         1,       "Mali-T720",      "Midgard",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<1> },
+    product_entry {     0x0750, PRD_MASK_0,            0,         1,       "Mali-T760",      "Midgard",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<2> },
+    product_entry {     0x0820, PRD_MASK_0,            0,         1,       "Mali-T820",      "Midgard",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<1> },
+    product_entry {     0x0830, PRD_MASK_0,            0,         1,       "Mali-T830",      "Midgard",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<2> },
+    product_entry {     0x0860, PRD_MASK_0,            0,         1,       "Mali-T860",      "Midgard",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<2> },
+    product_entry {     0x0880, PRD_MASK_0,            0,         1,       "Mali-T880",      "Midgard",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<3> },
+    product_entry {     0x6000, PRD_MASK_1,            0,         1,        "Mali-G71",      "Bifrost",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<3> },
+    product_entry {     0x6001, PRD_MASK_1,            0,         1,        "Mali-G72",      "Bifrost",       get_num<4>,       get_num<1>,       get_num<1>,       get_num<3> },
+    product_entry {     0x7000, PRD_MASK_1,            0,         1,        "Mali-G51",      "Bifrost",       get_num<4>,       get_num<2>,       get_num<2>,  get_num_eng_g51 },
+    product_entry {     0x7001, PRD_MASK_1,            0,         1,        "Mali-G76",      "Bifrost",       get_num<8>,       get_num<2>,       get_num<2>,       get_num<3> },
+    product_entry {     0x7002, PRD_MASK_1,            0,         1,        "Mali-G52",      "Bifrost",       get_num<8>,       get_num<2>,       get_num<2>,  get_num_eng_g52 },
+    product_entry {     0x7003, PRD_MASK_1,            0,         1,        "Mali-G31",      "Bifrost",       get_num<4>,       get_num<2>,       get_num<2>,  get_num_eng_g31 },
+    product_entry {     0x9000, PRD_MASK_1,            0,         1,        "Mali-G77",      "Valhall",      get_num<16>,       get_num<4>,       get_num<2>,       get_num<2> },
+    product_entry {     0x9001, PRD_MASK_1,            0,         1,        "Mali-G57",      "Valhall",      get_num<16>,       get_num<4>,       get_num<2>,       get_num<2> },
+    product_entry {     0x9003, PRD_MASK_1,            0,         1,        "Mali-G57",      "Valhall",      get_num<16>,       get_num<4>,       get_num<2>,       get_num<2> },
+    product_entry {     0x9004, PRD_MASK_1,            0,         1,        "Mali-G68",      "Valhall",      get_num<16>,       get_num<4>,       get_num<2>,       get_num<2> },
+    product_entry {     0x9002, PRD_MASK_1,            0,         1,        "Mali-G78",      "Valhall",      get_num<16>,       get_num<4>,       get_num<2>,       get_num<2> },
+    product_entry {     0x9005, PRD_MASK_1,            0,         1,      "Mali-G78AE",      "Valhall",      get_num<16>,       get_num<4>,       get_num<2>,       get_num<2> },
+    product_entry {     0xa002, PRD_MASK_1,            0,         1,       "Mali-G710",      "Valhall",      get_num<32>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry {     0xa007, PRD_MASK_1,            0,         1,       "Mali-G610",      "Valhall",      get_num<32>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry {     0xa003, PRD_MASK_1,          0xF,         1,       "Mali-G510",      "Valhall", get_num_fma_g510, get_num_tex_g510, get_num_pix_g510, get_num_eng_g510 },
+    product_entry {     0xa004, PRD_MASK_1,          0xF,         1,       "Mali-G310",      "Valhall", get_num_fma_g510, get_num_tex_g510, get_num_pix_g510, get_num_eng_g510 },
+    product_entry {     0xb002, PRD_MASK_1,            0,        10, "Immortalis-G715",      "Valhall",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry {     0xb002, PRD_MASK_1,            0,         7,       "Mali-G715",      "Valhall",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry {     0xb002, PRD_MASK_1,            0,         1,       "Mali-G615",      "Valhall",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry {     0xb003, PRD_MASK_1,            0,         1,       "Mali-G615",      "Valhall",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry {     0xc000, PRD_MASK_1,            0,        10, "Immortalis-G720",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry {     0xc000, PRD_MASK_1,            0,         6,       "Mali-G720",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry {     0xc000, PRD_MASK_1,            0,         1,       "Mali-G620",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry {     0xc001, PRD_MASK_1,            0,         1,       "Mali-G620",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry {     0xd000, PRD_MASK_1,            0,        10, "Immortalis-G925",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry {     0xd000, PRD_MASK_1,            0,         6,       "Mali-G725",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry {     0xd001, PRD_MASK_1,            0,         1,       "Mali-G625",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry {     0xe000, PRD_MASK_1,            0,        10,   "Mali G1-Ultra",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry {     0xe001, PRD_MASK_1,            0,         6, "Mali G1-Premium",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry {     0xe003, PRD_MASK_1,            0,         1,     "Mali G1-Pro",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry { 0x0f000000, PRD_MASK_2,            0,        10,   "Mali G2-Ultra",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry { 0x0f000001, PRD_MASK_2,            0,         6, "Mali G2-Premium",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry { 0x0f000003, PRD_MASK_2,            0,         1,     "Mali G2-Pro",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
+    product_entry { 0x0f000005, PRD_MASK_2,            0,         1,   "Mali G2-Ultra",  "Arm 5th Gen",      get_num<64>,       get_num<8>,       get_num<4>,       get_num<2> },
 }};
 
 static uint32_t get_gpu_id(
-    uint32_t gpu_id
+    uint32_t raw_gpu_id
 ) {
     for (const auto& entry : PRODUCT_VERSIONS)
     {
-        if (((gpu_id & entry.mask) == entry.id))
+        if (((raw_gpu_id & entry.id_mask) == entry.id))
         {
             return entry.id;
         }
     }
 
-    return gpu_id;
+    // Should never hit this for know products
+    return raw_gpu_id;
+}
+
+static uint32_t get_gpu_variant(
+    uint32_t gpu_id,
+    uint32_t core_features
+) {
+    for (const auto& entry : PRODUCT_VERSIONS)
+    {
+        if (gpu_id == entry.id)
+        {
+            return core_features & entry.variant_mask;
+        }
+    }
+
+    return 0;
 }
 
 static const char* get_gpu_name(
@@ -921,6 +941,8 @@ class prop_decoder {
         // Accumulate this after all shader core bitmasks are merged
         info.num_shader_cores = __builtin_popcountll(info.shader_core_mask);
 
+        info.gpu_variant = get_gpu_variant(info.gpu_id, raw_core_features);
+
         // Decode architecture versions
         constexpr uint64_t bits4 { 0xF };
         constexpr uint64_t bits8 { 0xFF };
@@ -1444,6 +1466,7 @@ bool instance::init_props_pre_r21() {
     }
 
     info_.gpu_id = get_gpu_id(props.props.core_props.product_id);
+    info_.gpu_variant = 0;
     info_.num_l2_bytes = 1UL << props.props.l2_props.log2_cache_size;
     info_.num_l2_slices = props.props.l2_props.num_l2_slices;
     info_.num_bus_bits = 1UL << (props.props.raw_props.l2_features >> 24);
